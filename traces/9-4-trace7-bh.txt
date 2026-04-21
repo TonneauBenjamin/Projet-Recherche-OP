@@ -1,0 +1,38 @@
+Méthode: Balas Hammer
+Trace:
+
+  Étape 1:
+    Pénalité max ligne: 40 (ligne 2)
+    Pénalité max colonne: 35 (colonne 1)
+    → Choisir ligne 2, coût min = 10 à (2,1)
+    → Allouer 200 à (2,1)
+
+  Étape 2:
+    Pénalité max ligne: 30 (ligne 1)
+    Pénalité max colonne: 15 (colonne 2)
+    → Choisir ligne 1, coût min = 20 à (1,2)
+    → Allouer 100 à (1,2)
+
+  Étape 3:
+    Pénalité max ligne: 10 (ligne 3)
+    Pénalité max colonne: 5 (colonne 1)
+    → Choisir ligne 3, coût min = 40 à (3,2)
+    → Allouer 100 à (3,2)
+
+  Étape 4:
+    Pénalité max ligne: 10 (ligne 4)
+    Pénalité max colonne: 45 (colonne 1)
+    → Choisir colonne 1, coût min = 45 à (4,1)
+    → Allouer 100 à (4,1)
+
+  Étape 5:
+    Pénalité max ligne: 35 (ligne 4)
+    Pénalité max colonne: 35 (colonne 2)
+    → Choisir ligne 4, coût min = 35 à (4,2)
+    → Allouer 100 à (4,2)
+Allocation finale:
+0 100
+200 0
+0 100
+100 100
+Coût total: 16000

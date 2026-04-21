@@ -1,0 +1,198 @@
+Méthode: Balas Hammer
+Trace:
+
+  Étape 1:
+    Pénalité max ligne: 1 (ligne 1)
+    Pénalité max colonne: 10 (colonne 1)
+    → Choisir colonne 1, coût min = 1 à (1,1)
+    → Allouer 10 à (1,1)
+
+  Étape 2:
+    Pénalité max ligne: 1 (ligne 2)
+    Pénalité max colonne: 10 (colonne 1)
+    → Choisir colonne 1, coût min = 11 à (2,1)
+    → Allouer 20 à (2,1)
+
+  Étape 3:
+    Pénalité max ligne: 1 (ligne 3)
+    Pénalité max colonne: 10 (colonne 1)
+    → Choisir colonne 1, coût min = 21 à (3,1)
+    → Allouer 30 à (3,1)
+
+  Étape 4:
+    Pénalité max ligne: 1 (ligne 4)
+    Pénalité max colonne: 10 (colonne 1)
+    → Choisir colonne 1, coût min = 31 à (4,1)
+    → Allouer 40 à (4,1)
+
+  Étape 5:
+    Pénalité max ligne: 1 (ligne 6)
+    Pénalité max colonne: 11 (colonne 2)
+    → Choisir colonne 2, coût min = 41 à (5,2)
+    → Allouer 50 à (5,2)
+
+  Étape 6:
+    Pénalité max ligne: 1 (ligne 6)
+    Pénalité max colonne: 10 (colonne 1)
+    → Choisir colonne 1, coût min = 51 à (6,1)
+    → Allouer 20 à (6,1)
+
+  Étape 7:
+    Pénalité max ligne: 1 (ligne 6)
+    Pénalité max colonne: 10 (colonne 2)
+    → Choisir colonne 2, coût min = 52 à (6,2)
+    → Allouer 40 à (6,2)
+
+  Étape 8:
+    Pénalité max ligne: 1 (ligne 7)
+    Pénalité max colonne: 10 (colonne 2)
+    → Choisir colonne 2, coût min = 62 à (7,2)
+    → Allouer 50 à (7,2)
+
+  Étape 9:
+    Pénalité max ligne: 1 (ligne 7)
+    Pénalité max colonne: 10 (colonne 3)
+    → Choisir colonne 3, coût min = 63 à (7,3)
+    → Allouer 20 à (7,3)
+
+  Étape 10:
+    Pénalité max ligne: 1 (ligne 8)
+    Pénalité max colonne: 10 (colonne 3)
+    → Choisir colonne 3, coût min = 73 à (8,3)
+    → Allouer 80 à (8,3)
+
+  Étape 11:
+    Pénalité max ligne: 1 (ligne 9)
+    Pénalité max colonne: 10 (colonne 3)
+    → Choisir colonne 3, coût min = 83 à (9,3)
+    → Allouer 60 à (9,3)
+
+  Étape 12:
+    Pénalité max ligne: 1 (ligne 9)
+    Pénalité max colonne: 10 (colonne 4)
+    → Choisir colonne 4, coût min = 84 à (9,4)
+    → Allouer 30 à (9,4)
+
+  Étape 13:
+    Pénalité max ligne: 1 (ligne 10)
+    Pénalité max colonne: 10 (colonne 4)
+    → Choisir colonne 4, coût min = 94 à (10,4)
+    → Allouer 100 à (10,4)
+
+  Étape 14:
+    Pénalité max ligne: 1 (ligne 11)
+    Pénalité max colonne: 10 (colonne 4)
+    → Choisir colonne 4, coût min = 104 à (11,4)
+    → Allouer 50 à (11,4)
+
+  Étape 15:
+    Pénalité max ligne: 1 (ligne 11)
+    Pénalité max colonne: 10 (colonne 5)
+    → Choisir colonne 5, coût min = 105 à (11,5)
+    → Allouer 60 à (11,5)
+
+  Étape 16:
+    Pénalité max ligne: 1 (ligne 12)
+    Pénalité max colonne: 10 (colonne 5)
+    → Choisir colonne 5, coût min = 115 à (12,5)
+    → Allouer 120 à (12,5)
+
+  Étape 17:
+    Pénalité max ligne: 1 (ligne 13)
+    Pénalité max colonne: 10 (colonne 5)
+    → Choisir colonne 5, coût min = 125 à (13,5)
+    → Allouer 20 à (13,5)
+
+  Étape 18:
+    Pénalité max ligne: 1 (ligne 13)
+    Pénalité max colonne: 10 (colonne 6)
+    → Choisir colonne 6, coût min = 126 à (13,6)
+    → Allouer 110 à (13,6)
+
+  Étape 19:
+    Pénalité max ligne: 1 (ligne 14)
+    Pénalité max colonne: 10 (colonne 6)
+    → Choisir colonne 6, coût min = 136 à (14,6)
+    → Allouer 110 à (14,6)
+
+  Étape 20:
+    Pénalité max ligne: 1 (ligne 14)
+    Pénalité max colonne: 10 (colonne 7)
+    → Choisir colonne 7, coût min = 137 à (14,7)
+    → Allouer 30 à (14,7)
+
+  Étape 21:
+    Pénalité max ligne: 1 (ligne 15)
+    Pénalité max colonne: 10 (colonne 7)
+    → Choisir colonne 7, coût min = 147 à (15,7)
+    → Allouer 150 à (15,7)
+
+  Étape 22:
+    Pénalité max ligne: 1 (ligne 16)
+    Pénalité max colonne: 10 (colonne 7)
+    → Choisir colonne 7, coût min = 157 à (16,7)
+    → Allouer 60 à (16,7)
+
+  Étape 23:
+    Pénalité max ligne: 1 (ligne 16)
+    Pénalité max colonne: 10 (colonne 8)
+    → Choisir colonne 8, coût min = 158 à (16,8)
+    → Allouer 100 à (16,8)
+
+  Étape 24:
+    Pénalité max ligne: 1 (ligne 17)
+    Pénalité max colonne: 10 (colonne 8)
+    → Choisir colonne 8, coût min = 168 à (17,8)
+    → Allouer 160 à (17,8)
+
+  Étape 25:
+    Pénalité max ligne: 1 (ligne 17)
+    Pénalité max colonne: 10 (colonne 9)
+    → Choisir colonne 9, coût min = 169 à (17,9)
+    → Allouer 10 à (17,9)
+
+  Étape 26:
+    Pénalité max ligne: 1 (ligne 18)
+    Pénalité max colonne: 10 (colonne 9)
+    → Choisir colonne 9, coût min = 179 à (18,9)
+    → Allouer 180 à (18,9)
+
+  Étape 27:
+    Pénalité max ligne: 1 (ligne 19)
+    Pénalité max colonne: 10 (colonne 9)
+    → Choisir colonne 9, coût min = 189 à (19,9)
+    → Allouer 90 à (19,9)
+
+  Étape 28:
+    Pénalité max ligne: 200 (ligne 20)
+    Pénalité max colonne: 10 (colonne 10)
+    → Choisir ligne 20, coût min = 200 à (20,10)
+    → Allouer 200 à (20,10)
+
+  Étape 29:
+    Pénalité max ligne: 190 (ligne 19)
+    Pénalité max colonne: 190 (colonne 10)
+    → Choisir ligne 19, coût min = 190 à (19,10)
+    → Allouer 100 à (19,10)
+Allocation finale:
+10 0 0 0 0 0 0 0 0 0
+20 0 0 0 0 0 0 0 0 0
+30 0 0 0 0 0 0 0 0 0
+40 0 0 0 0 0 0 0 0 0
+0 50 0 0 0 0 0 0 0 0
+20 40 0 0 0 0 0 0 0 0
+0 50 20 0 0 0 0 0 0 0
+0 0 80 0 0 0 0 0 0 0
+0 0 60 30 0 0 0 0 0 0
+0 0 0 100 0 0 0 0 0 0
+0 0 0 50 60 0 0 0 0 0
+0 0 0 0 120 0 0 0 0 0
+0 0 0 0 20 110 0 0 0 0
+0 0 0 0 0 110 30 0 0 0
+0 0 0 0 0 0 150 0 0 0
+0 0 0 0 0 0 60 100 0 0
+0 0 0 0 0 0 0 160 10 0
+0 0 0 0 0 0 0 0 180 0
+0 0 0 0 0 0 0 0 90 100
+0 0 0 0 0 0 0 0 0 200
+Coût total: 279150
