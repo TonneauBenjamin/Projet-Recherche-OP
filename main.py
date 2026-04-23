@@ -35,7 +35,27 @@ def main():
 
     continuer = True
     while continuer:
-        num_prob = input("\nNumero du probleme (1-12) : ").strip()
+        print("\n=== MENU PRINCIPAL ===")
+        print("  1-12 : Numero du probleme a resoudre")
+        print("  C    : Lancer l'etude de complexite")
+        print("  Q    : Quitter le programme")
+        
+        choix = input("\nVotre choix : ").strip().upper()
+        
+        if choix == 'Q':
+            continuer = False
+            continue
+            
+        if choix == 'C':
+            try:
+                import complexite
+                complexite.run_complexite()
+            except ImportError as e:
+                print(f"Erreur lors de l'import de l'etude de complexite : {e}")
+            continue
+
+        # Si ce n'est ni Q ni C, c'est censé être un numéro de problème
+        num_prob = choix
         fichier = f"entrees/probleme{num_prob}.txt"
 
         try:

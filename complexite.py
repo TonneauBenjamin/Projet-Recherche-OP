@@ -8,28 +8,20 @@ Mesure et analyse de la complexite des algorithmes de transport:
 - Methode du marche-pied avec potentiel (tNO, tBH)
 
 Utilisation:
-    python3 complexite.py           # Menu interactif
-    python3 complexite.py --simple  # Version simple (CSV)
-    python3 complexite.py --test    # Test rapide
+    python3 complexite.py           # Execution de l'etude de complexite
 """
 
 import time
 import random
 import json
-import csv
 import sys
 import os
 import algorithmes as algo
 
-# Essayer d'importer matplotlib (optionnel)
-try:
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    import numpy as np
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
 
 # ==========================================
 # GENERATION DE PROBLÈMES ALEATOIRES
@@ -102,12 +94,8 @@ def etude_complexite_complete():
     - tBH(n): temps du marche-pied avec Balas-Hammer
     """
     
-    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000] # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
-    iterations = 100  # 100 iterations
-    
-    # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
-    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  # Ajuste pour un temps d'execution raisonnable
-    iterations = 100  # 100 iterations par taille pour aller plus vite
+    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  
+    iterations = 100 
      
     # Stockage des resultats
     resultats = {}
@@ -364,133 +352,7 @@ def identifier_complexite(tailles, temps_max):
     return meilleur_type, meilleur_r2
 
 
-# ==========================================
-# VERSION SIMPLE (SANS MATPLOTLIB)
-# ==========================================
 
-def etude_complexite_simple(tailles_n=None, iterations=100):
-    """Effectue l'etude de complexite et exporte en CSV et JSON."""
-    
-    if tailles_n is None:
-        tailles_n = [10, 40, 100, 400]
-    
-    print("="*70)
-    print("ETUDE DE COMPLEXITE (VERSION SIMPLIFIEE)")
-    print("="*70)
-    print(f"Tailles testees: {tailles_n}")
-    print(f"Iterations par taille: {iterations}\n")
-    
-    resultats = {}
-    donnees_csv = []
-    
-    for n in tailles_n:
-        print(f"Taille n = {n:5d} : ", end="", flush=True)
-        
-        temps_no_list = []
-        temps_bh_list = []
-        temps_marche_no_list = []
-        temps_marche_bh_list = []
-        
-        for iter_num in range(iterations):
-            # Generer un probleme aleatoire
-            couts, provisions, commandes = generer_probleme_aleatoire(n)
-            
-            # Mesurer Nord-Ouest
-            try:
-                debut = time.perf_counter()
-                prop_no = algo.algo_nord_ouest(provisions, commandes)
-                t_no = time.perf_counter() - debut
-                temps_no_list.append(t_no)
-            except:
-                temps_no_list.append(0)
-            
-            # Mesurer Balas-Hammer (reduire stdout)
-            try:
-                from io import StringIO
-                old_stdout = sys.stdout
-                sys.stdout = StringIO()
-                
-                debut = time.perf_counter()
-                prop_bh = algo.algo_balas_hammer(couts, provisions, commandes)
-                t_bh = time.perf_counter() - debut
-                
-                sys.stdout = old_stdout
-                temps_bh_list.append(t_bh)
-            except:
-                sys.stdout = old_stdout
-                temps_bh_list.append(0)
-            
-            # Mesurer marche-pied complet
-            try:
-                import copy
-                debut = time.perf_counter()
-                algo.marche_pied_complet(couts, copy.deepcopy(prop_no), n, n, afficher=False)
-                t_marche_no = time.perf_counter() - debut
-                temps_marche_no_list.append(t_marche_no)
-            except:
-                temps_marche_no_list.append(0)
-            
-            try:
-                import copy
-                debut = time.perf_counter()
-                algo.marche_pied_complet(couts, copy.deepcopy(prop_bh), n, n, afficher=False)
-                t_marche_bh = time.perf_counter() - debut
-                temps_marche_bh_list.append(t_marche_bh)
-            except:
-                temps_marche_bh_list.append(0)
-            
-            if (iter_num + 1) % 20 == 0:
-                print(".", end="", flush=True)
-        
-        print(" [OK]")
-        
-        # Calculer les statistiques
-        max_no = max(temps_no_list) if temps_no_list else 0
-        max_bh = max(temps_bh_list) if temps_bh_list else 0
-        max_marche_no = max(temps_marche_no_list) if temps_marche_no_list else 0
-        max_marche_bh = max(temps_marche_bh_list) if temps_marche_bh_list else 0
-        
-        avg_no = sum(temps_no_list) / len(temps_no_list) if temps_no_list else 0
-        avg_bh = sum(temps_bh_list) / len(temps_bh_list) if temps_bh_list else 0
-        avg_marche_no = sum(temps_marche_no_list) / len(temps_marche_no_list) if temps_marche_no_list else 0
-        avg_marche_bh = sum(temps_marche_bh_list) / len(temps_marche_bh_list) if temps_marche_bh_list else 0
-        
-        resultats[n] = {
-            'theta_no_max': max_no,
-            'theta_no_avg': avg_no,
-            'theta_bh_max': max_bh,
-            'theta_bh_avg': avg_bh,
-            't_marche_no_max': max_marche_no,
-            't_marche_no_avg': avg_marche_no,
-            't_marche_bh_max': max_marche_bh,
-            't_marche_bh_avg': avg_marche_bh,
-            'total_no_max': max_no + max_marche_no,
-            'total_bh_max': max_bh + max_marche_bh,
-        }
-        
-        print(f"  theta_NO(n)  pire: {max_no:.8f}s")
-        print(f"  theta_BH(n)  pire: {max_bh:.8f}s")
-        print(f"  tNO(n)  pire: {max_marche_no:.8f}s")
-        print(f"  tBH(n)  pire: {max_marche_bh:.8f}s")
-        print(f"  TOTAL NO pire: {max_no + max_marche_no:.8f}s")
-        print(f"  TOTAL BH pire: {max_bh + max_marche_bh:.8f}s")
-        print()
-    
-    # Afficher les conclusions
-    print("\n" + "="*70)
-    print("CONCLUSIONS")
-    print("="*70)
-    
-    for n in tailles_n:
-        ratio = resultats[n]['total_no_max'] / resultats[n]['total_bh_max'] if resultats[n]['total_bh_max'] > 0 else 1
-        meilleur = "Nord-Ouest" if ratio < 1 else "Balas-Hammer"
-        print(f"n = {n:5d}: Ratio NO/BH = {ratio:.4f} ({meilleur} plus rapide)")
-    
-    print("\n" + "="*70)
-    print("ETUDE TERMINEE [OK]")
-    print("="*70)
-    
-    return resultats, tailles_n
 
 
 
@@ -505,66 +367,15 @@ ETUDE DE COMPLEXITE - PROBLÈMES DE TRANSPORT
 
 Usage:
     python3 complexite.py              # Execution complete (graphiques)
-    python3 complexite.py --simple     # Version simple (CSV)
-    python3 complexite.py --test       # Test rapide (30 secondes)
     python3 complexite.py --help       # Affiche cette aide
-
-Options:
-    --help              Affiche cette aide
-    --simple            Execution sans matplotlib (sortie CSV)
-    --test              Test rapide avec tailles [10, 20] et 10 iterations
     """)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        arg = sys.argv[1].lower()
-        
-        if arg == '--help' or arg == '-h':
-            afficher_usage()
-            sys.exit(0)
-        
-        elif arg == '--simple':
-            print("\n" + "="*70)
-            print("ANALYSE DE COMPLEXITE - VERSION SIMPLE (SANS GRAPHIQUES)")
-            print("="*70 + "\n")
-            
-            resultats, tailles = etude_complexite_simple(
-                tailles_n=[10, 40, 100, 400],
-                iterations=100
-            )
-            print("\nUtilisez le fichier resultats_complexite.csv avec Excel/LibreOffice")
-            sys.exit(0)
-        
-        elif arg == '--test':
-            print("\n" + "="*70)
-            print("TEST RAPIDE DE L'ETUDE DE COMPLEXITE")
-            print("="*70 + "\n")
-            
-            resultats, tailles = etude_complexite_simple(
-                tailles_n=[10, 20],
-                iterations=10
-            )
-            print("\n[OK] Test reussi!")
-            sys.exit(0)
-        
-        else:
-            print(f"[ERREUR] Argument inconnu: {arg}")
-            afficher_usage()
-            sys.exit(1)
-    
-    # Execution par defaut: version complete avec graphiques
+def run_complexite():
+    """Lance l'etude complete de complexite, incluant l'identification et les graphiques."""
     print("\n" + "="*70)
     print("ANALYSE DE COMPLEXITE - PROBLÈMES DE TRANSPORT")
     print("="*70 + "\n")
-    
-    if not HAS_MATPLOTLIB:
-        print("[ATTENTION] ATTENTION: matplotlib n'est pas installe")
-        print("Les graphiques ne peuvent pas etre generes.")
-        print("Pour l'installer: pip install matplotlib numpy")
-        print("\nUtilisez: python3 complexite.py --simple")
-        print("pour une execution sans matplotlib (sortie CSV)\n")
-        sys.exit(1)
     
     # Effectuer l'etude complete
     resultats, tailles_n = etude_complexite_complete()
@@ -615,3 +426,18 @@ if __name__ == "__main__":
     print("\n" + "="*70)
     print("ETUDE TERMINEE")
     print("="*70)
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        arg = sys.argv[1].lower()
+        
+        if arg == '--help' or arg == '-h':
+            afficher_usage()
+            sys.exit(0)
+        
+        else:
+            print(f"[ERREUR] Argument inconnu: {arg}")
+            afficher_usage()
+            sys.exit(1)
+            
+    run_complexite()
