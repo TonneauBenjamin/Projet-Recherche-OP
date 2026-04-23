@@ -101,9 +101,9 @@ def etude_complexite_complete():
     - tNO(n): temps du marche-pied avec Nord-Ouest
     - tBH(n): temps du marche-pied avec Balas-Hammer
     """
-    # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
-    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  # Ajuste pour un temps d'execution raisonnable
-    iterations = 100  # 100 iterations par taille pour aller plus vite
+    
+    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000] # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
+    iterations = 100  # 100 iterations
     
     # Stockage des resultats
     resultats = {}
