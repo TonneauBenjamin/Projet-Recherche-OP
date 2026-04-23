@@ -104,7 +104,7 @@ def etude_complexite_complete():
     # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
     tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  # Ajuste pour un temps d'execution raisonnable
     iterations = 100  # 100 iterations par taille pour aller plus vite
-    
+     
     # Stockage des resultats
     resultats = {}
     
