@@ -10,7 +10,10 @@ class Logger:
         self.log = open(filename, "w", encoding="utf-8")
 
     def write(self, message):
-        self.terminal.write(message)
+        try:
+            self.terminal.write(message)
+        except UnicodeEncodeError:
+            self.terminal.write(message.encode('ascii', 'replace').decode('ascii'))
         self.log.write(message)
 
     def flush(self):
@@ -76,9 +79,9 @@ def _resoudre(n, m, couts, prov, cmd, choix, methode, num_prob):
     print(f"  Fournisseurs : {n}   Clients : {m}")
     print(f"{'=' * 60}")
 
-    algo.afficher_matrice(couts, titres_l, titres_c, "TABLEAU DES COUTS")
-    print(f"Provisions : {prov}")
-    print(f"Commandes  : {cmd}")
+    # Affichage du tableau des couts avec provisions et commandes
+    algo.afficher_matrice(couts, titres_l, titres_c, "TABLEAU DES COUTS",
+                          provisions=prov, commandes=cmd)
 
     # --- Proposition initiale ---
     if choix == "1":
@@ -88,53 +91,17 @@ def _resoudre(n, m, couts, prov, cmd, choix, methode, num_prob):
         print("\n--- Methode Balas-Hammer ---")
         prop = algo.algo_balas_hammer(couts, prov, cmd)
 
-    algo.afficher_matrice(prop, titres_l, titres_c, "PROPOSITION INITIALE")
-    cout_actuel = algo.calculer_cout_total(couts, prop)
-    print(f"Cout initial : {cout_actuel}")
+    algo.afficher_matrice(prop, titres_l, titres_c, "PROPOSITION INITIALE",
+                          provisions=prov, commandes=cmd)
+    cout_initial = algo.calculer_cout_total(couts, prop)
+    print(f"Cout initial : {cout_initial}")
 
-    # --- Boucle Marche-Pied ---
-    iteration = 0
-    optimise = False
+    # --- Boucle Marche-Pied avec potentiel ---
+    print(f"\n{'=' * 60}")
+    print(f"  METHODE DU MARCHE-PIED AVEC POTENTIEL")
+    print(f"{'=' * 60}")
 
-    while not optimise:
-        print(f"\n{'─' * 50}")
-        print(f"  ITERATION {iteration}")
-        print(f"{'─' * 50}")
-
-        u, v, marginaux, case_amel, base = algo.calculer_potentiels_et_marginaux(couts, prop)
-
-        print(f"Potentiels U (fournisseurs) : {u}")
-        print(f"Potentiels V (clients)      : {v}")
-        algo.afficher_matrice(marginaux, titres_l, titres_c, "COUTS MARGINAUX")
-
-        if case_amel is None:
-            print(f"\n*** SOLUTION OPTIMALE atteinte a l'iteration {iteration} ***")
-            print(f"Cout total optimal : {cout_actuel}")
-            algo.afficher_matrice(prop, titres_l, titres_c, "ALLOCATION FINALE")
-            optimise = True
-        else:
-            i_a, j_a = case_amel
-            print(f"Case ameliorante : ({i_a + 1},{j_a + 1})  (cout marginal = {marginaux[i_a][j_a]})")
-
-            cycle = algo.trouver_cycle(base, case_amel, n, m)
-
-            if cycle is None:
-                print("ATTENTION : aucun cycle trouve (degenerescence non resolue). Arret.")
-                break
-
-            cycle_affiche = [(i + 1, j + 1) for i, j in cycle]
-            print(f"Cycle : {cycle_affiche}")
-
-            prop, delta = algo.ameliorer_proposition(prop, cycle)
-
-            if delta == 0:
-                print("ATTENTION : pivot degenere (delta = 0). Arret pour eviter le cyclage.")
-                break
-
-            print(f"Deplacement de {delta} unites sur le cycle.")
-            cout_actuel = algo.calculer_cout_total(couts, prop)
-            print(f"Nouveau cout : {cout_actuel}")
-            iteration += 1
+    prop_opt, cout_opt = algo.marche_pied_complet(couts, prop, n, m, afficher=True)
 
 
 if __name__ == "__main__":

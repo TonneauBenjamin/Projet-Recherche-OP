@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-PARTIE 3 - ÉTUDE DE COMPLEXITÉ DU PROJET RECHERCHE OPÉRATIONNELLE
+PARTIE 3 - ETUDE DE COMPLEXITE DU PROJET RECHERCHE OPERATIONNELLE
 
-Mesure et analyse de la complexité des algorithmes de transport:
-- Algorithme Nord-Ouest (θNO)
-- Algorithme Balas-Hammer (θBH)
-- Méthode du marche-pied avec potentiel (tNO, tBH)
+Mesure et analyse de la complexite des algorithmes de transport:
+- Algorithme Nord-Ouest (theta_NO)
+- Algorithme Balas-Hammer (theta_BH)
+- Methode du marche-pied avec potentiel (tNO, tBH)
 
 Utilisation:
     python3 complexite.py           # Menu interactif
@@ -32,15 +32,15 @@ except ImportError:
     HAS_MATPLOTLIB = False
 
 # ==========================================
-# GÉNÉRATION DE PROBLÈMES ALÉATOIRES
+# GENERATION DE PROBLÈMES ALEATOIRES
 # ==========================================
 
 def generer_probleme_aleatoire(n):
-    """Génère un problème de transport aléatoire de taille n x n.
+    """Genere un probleme de transport aleatoire de taille n x n.
     
-    Selon les spécifications du projet:
-    1. Générer une matrice de coûts avec des valeurs aléatoires entre 1 et 100
-    2. Générer une matrice temp avec des valeurs aléatoires entre 1 et 100
+    Selon les specifications du projet:
+    1. Generer une matrice de coûts avec des valeurs aleatoires entre 1 et 100
+    2. Generer une matrice temp avec des valeurs aleatoires entre 1 et 100
     3. Pi = somme des colonnes de temp pour la ligne i
     4. Cj = somme des lignes de temp pour la colonne j
     """
@@ -54,11 +54,11 @@ def generer_probleme_aleatoire(n):
 
 
 # ==========================================
-# MESURE DES TEMPS D'EXÉCUTION
+# MESURE DES TEMPS D'EXECUTION
 # ==========================================
 
 def mesurer_nord_ouest(provisions, commandes):
-    """Mesure le temps d'exécution de l'algorithme Nord-Ouest."""
+    """Mesure le temps d'execution de l'algorithme Nord-Ouest."""
     debut = time.perf_counter()
     prop = algo.algo_nord_ouest(provisions, commandes)
     fin = time.perf_counter()
@@ -66,66 +66,53 @@ def mesurer_nord_ouest(provisions, commandes):
 
 
 def mesurer_balas_hammer(couts, provisions, commandes):
-    """Mesure le temps d'exécution de l'algorithme Balas-Hammer."""
-    # Rediriger print pour éviter le spam
-    import sys
-    from io import StringIO
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-    
+    """Mesure le temps d'execution de l'algorithme Balas-Hammer."""
     debut = time.perf_counter()
-    prop = algo.algo_balas_hammer(couts, provisions, commandes)
+    prop = algo.algo_balas_hammer(couts, provisions, commandes, silencieux=True)
     fin = time.perf_counter()
-    
-    sys.stdout = old_stdout
     return fin - debut, prop
 
 
 def mesurer_marche_pied(couts, prop_initiale):
-    """Mesure le temps d'exécution du marche-pied avec potentiel.
-    
-    Note: Cette fonction complète la boucle d'optimisation jusqu'à convergence.
-    """
+    """Mesure le temps d'execution du marche-pied complet avec potentiel."""
+    import copy
+    prop = copy.deepcopy(prop_initiale)
+    n = len(couts)
+    m = len(couts[0])
     debut = time.perf_counter()
-    
-    # Appeler la méthode du marche-pied (stepping stone)
-    # On effectue une itération complète si elle existe
     try:
-        u, v, marginaux, case_ameliorante, base = algo.calculer_potentiels_et_marginaux(couts, prop_initiale)
-        # Si pas de case améliorante, on s'arrête
-        # Sinon on pourrait continuer, mais pour cette étude on mesure juste une itération
-    except:
+        algo.marche_pied_complet(couts, prop, n, m, afficher=False)
+    except Exception:
         pass
-    
     fin = time.perf_counter()
     return fin - debut
 
 
 # ==========================================
-# ÉTUDE DE COMPLEXITÉ
+# ETUDE DE COMPLEXITE
 # ==========================================
 
 def etude_complexite_complete():
-    """Effectue l'étude complète de complexité selon les spécifications du projet.
+    """Effectue l'etude complete de complexite selon les specifications du projet.
     
     Mesure pour chaque taille n:
-    - θNO(n): temps de l'algorithme Nord-Ouest
-    - θBH(n): temps de l'algorithme Balas-Hammer  
+    - theta_NO(n): temps de l'algorithme Nord-Ouest
+    - theta_BH(n): temps de l'algorithme Balas-Hammer  
     - tNO(n): temps du marche-pied avec Nord-Ouest
     - tBH(n): temps du marche-pied avec Balas-Hammer
     """
-    # Tailles à tester: 10, 40, 100, 400, 1000, 4000, 10000
-    tailles_n = [10, 40, 100, 400]  # Adapter selon votre PC
-    iterations = 100  # 100 itérations par taille
+    # Tailles a tester: 10, 40, 100, 400, 1000, 4000, 10000
+    tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  # Ajuste pour un temps d'execution raisonnable
+    iterations = 100  # 100 iterations par taille pour aller plus vite
     
-    # Stockage des résultats
+    # Stockage des resultats
     resultats = {}
     
     print("="*70)
-    print("ÉTUDE DE COMPLEXITÉ - PROBLÈMES DE TRANSPORT")
+    print("ETUDE DE COMPLEXITE - PROBLÈMES DE TRANSPORT")
     print("="*70)
-    print(f"Nombre d'itérations par taille: {iterations}")
-    print(f"Tailles testées: {tailles_n}")
+    print(f"Nombre d'iterations par taille: {iterations}")
+    print(f"Tailles testees: {tailles_n}")
     print()
     
     for n in tailles_n:
@@ -139,7 +126,7 @@ def etude_complexite_complete():
         temps_marche_bh_list = []
         
         for iter_num in range(iterations):
-            # Générer un problème aléatoire
+            # Generer un probleme aleatoire
             couts, provisions, commandes = generer_probleme_aleatoire(n)
             
             # 1. Mesurer Nord-Ouest
@@ -159,7 +146,7 @@ def etude_complexite_complete():
             temps_marche_bh_list.append(t_marche_bh)
             
             if (iter_num + 1) % 10 == 0:
-                print(f"  Itération {iter_num + 1}/{iterations} complétée")
+                print(f"  Iteration {iter_num + 1}/{iterations} completee")
         
         # Calculer les statistiques
         resultats[n] = {
@@ -169,15 +156,15 @@ def etude_complexite_complete():
             't_marche_bh': temps_marche_bh_list,
         }
         
-        # Afficher les résultats pour cette taille
+        # Afficher les resultats pour cette taille
         max_no = max(temps_no_list)
         max_bh = max(temps_bh_list)
         max_marche_no = max(temps_marche_no_list)
         max_marche_bh = max(temps_marche_bh_list)
         
-        print(f"\nRésultats pour n = {n}:")
-        print(f"  θNO(n)  - Pire cas: {max_no:.8f}s (moyenne: {np.mean(temps_no_list):.8f}s)")
-        print(f"  θBH(n)  - Pire cas: {max_bh:.8f}s (moyenne: {np.mean(temps_bh_list):.8f}s)")
+        print(f"\nResultats pour n = {n}:")
+        print(f"  theta_NO(n)  - Pire cas: {max_no:.8f}s (moyenne: {np.mean(temps_no_list):.8f}s)")
+        print(f"  theta_BH(n)  - Pire cas: {max_bh:.8f}s (moyenne: {np.mean(temps_bh_list):.8f}s)")
         print(f"  tNO(n)  - Pire cas: {max_marche_no:.8f}s (moyenne: {np.mean(temps_marche_no_list):.8f}s)")
         print(f"  tBH(n)  - Pire cas: {max_marche_bh:.8f}s (moyenne: {np.mean(temps_marche_bh_list):.8f}s)")
         print(f"  Total NO - Pire cas: {max_no + max_marche_no:.8f}s")
@@ -187,16 +174,16 @@ def etude_complexite_complete():
 
 
 # ==========================================
-# TRAÇAGE DES RÉSULTATS
+# TRAÇAGE DES RESULTATS
 # ==========================================
 
 def tracer_nuages_de_points(resultats, tailles_n):
     """Trace les nuages de points avec les 100 valeurs pour chaque n."""
     
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-    fig.suptitle('Étude de Complexité - Nuages de Points', fontsize=16, fontweight='bold')
+    fig.suptitle('Etude de Complexite - Nuages de Points', fontsize=16, fontweight='bold')
     
-    # 1. θNO(n)
+    # 1. theta_NO(n)
     ax = axes[0, 0]
     for n in tailles_n:
         x = [n] * len(resultats[n]['theta_no'])
@@ -204,10 +191,10 @@ def tracer_nuages_de_points(resultats, tailles_n):
         ax.scatter(x, y, alpha=0.6, s=30)
     ax.set_xlabel('Taille n')
     ax.set_ylabel('Temps (secondes)')
-    ax.set_title('θNO(n) - Nord-Ouest')
+    ax.set_title('theta_NO(n) - Nord-Ouest')
     ax.grid(True, alpha=0.3)
     
-    # 2. θBH(n)
+    # 2. theta_BH(n)
     ax = axes[0, 1]
     for n in tailles_n:
         x = [n] * len(resultats[n]['theta_bh'])
@@ -215,7 +202,7 @@ def tracer_nuages_de_points(resultats, tailles_n):
         ax.scatter(x, y, alpha=0.6, s=30, color='orange')
     ax.set_xlabel('Taille n')
     ax.set_ylabel('Temps (secondes)')
-    ax.set_title('θBH(n) - Balas-Hammer')
+    ax.set_title('theta_BH(n) - Balas-Hammer')
     ax.grid(True, alpha=0.3)
     
     # 3. tNO(n)
@@ -240,7 +227,7 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('tBH(n) - Marche-pied + Balas-Hammer')
     ax.grid(True, alpha=0.3)
     
-    # 5. (θNO + tNO)(n)
+    # 5. (theta_NO + tNO)(n)
     ax = axes[1, 1]
     for n in tailles_n:
         totaux = [resultats[n]['theta_no'][i] + resultats[n]['t_marche_no'][i] 
@@ -249,10 +236,10 @@ def tracer_nuages_de_points(resultats, tailles_n):
         ax.scatter(x, totaux, alpha=0.6, s=30, color='purple')
     ax.set_xlabel('Taille n')
     ax.set_ylabel('Temps (secondes)')
-    ax.set_title('(θNO + tNO)(n) - Total Nord-Ouest')
+    ax.set_title('(theta_NO + tNO)(n) - Total Nord-Ouest')
     ax.grid(True, alpha=0.3)
     
-    # 6. (θBH + tBH)(n)
+    # 6. (theta_BH + tBH)(n)
     ax = axes[1, 2]
     for n in tailles_n:
         totaux = [resultats[n]['theta_bh'][i] + resultats[n]['t_marche_bh'][i] 
@@ -261,17 +248,17 @@ def tracer_nuages_de_points(resultats, tailles_n):
         ax.scatter(x, totaux, alpha=0.6, s=30, color='brown')
     ax.set_xlabel('Taille n')
     ax.set_ylabel('Temps (secondes)')
-    ax.set_title('(θBH + tBH)(n) - Total Balas-Hammer')
+    ax.set_title('(theta_BH + tBH)(n) - Total Balas-Hammer')
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig('complexite_nuages_points.png', dpi=300)
-    print("\n✓ Graphique sauvegardé: complexite_nuages_points.png")
+    print("\n[OK] Graphique sauvegarde: complexite_nuages_points.png")
     plt.show()
 
 
 def tracer_pire_des_cas(resultats, tailles_n):
-    """Trace l'enveloppe supérieure (pire des cas) pour chaque algorithme."""
+    """Trace l'enveloppe superieure (pire des cas) pour chaque algorithme."""
     
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     
@@ -284,27 +271,27 @@ def tracer_pire_des_cas(resultats, tailles_n):
     maxima_total_bh = [maxima_bh[i] + maxima_marche_bh[i] for i in range(len(tailles_n))]
     
     # Tracer les courbes
-    ax.plot(tailles_n, maxima_no, 'o-', label='θNO(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_bh, 's-', label='θBH(n)', linewidth=2, markersize=8)
+    ax.plot(tailles_n, maxima_no, 'o-', label='theta_NO(n)', linewidth=2, markersize=8)
+    ax.plot(tailles_n, maxima_bh, 's-', label='theta_BH(n)', linewidth=2, markersize=8)
     ax.plot(tailles_n, maxima_marche_no, '^-', label='tNO(n)', linewidth=2, markersize=8)
     ax.plot(tailles_n, maxima_marche_bh, 'v-', label='tBH(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_total_no, 'D-', label='(θNO + tNO)(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_total_bh, 'x-', label='(θBH + tBH)(n)', linewidth=2, markersize=8)
+    ax.plot(tailles_n, maxima_total_no, 'D-', label='(theta_NO + tNO)(n)', linewidth=2, markersize=8)
+    ax.plot(tailles_n, maxima_total_bh, 'x-', label='(theta_BH + tBH)(n)', linewidth=2, markersize=8)
     
     ax.set_xlabel('Taille n', fontsize=12)
     ax.set_ylabel('Temps (secondes)', fontsize=12)
-    ax.set_title('Complexité dans le Pire des Cas', fontsize=14, fontweight='bold')
+    ax.set_title('Complexite dans le Pire des Cas', fontsize=14, fontweight='bold')
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig('complexite_pire_des_cas.png', dpi=300)
-    print("✓ Graphique sauvegardé: complexite_pire_des_cas.png")
+    print("[OK] Graphique sauvegarde: complexite_pire_des_cas.png")
     plt.show()
 
 
 def tracer_comparaison_ratios(resultats, tailles_n):
-    """Trace le ratio (tNO + θNO) / (tBH + θBH) pour comparer les algorithmes."""
+    """Trace le ratio (tNO + theta_NO) / (tBH + theta_BH) pour comparer les algorithmes."""
     
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
     
@@ -317,10 +304,10 @@ def tracer_comparaison_ratios(resultats, tailles_n):
     
     colors = ['green' if r < 1 else 'red' for r in ratios]
     ax.bar(tailles_n, ratios, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
-    ax.axhline(y=1, color='black', linestyle='--', linewidth=2, label='Équivalent')
+    ax.axhline(y=1, color='black', linestyle='--', linewidth=2, label='Equivalent')
     
     ax.set_xlabel('Taille n', fontsize=12)
-    ax.set_ylabel('Ratio (θNO + tNO) / (θBH + tBH)', fontsize=12)
+    ax.set_ylabel('Ratio (theta_NO + tNO) / (theta_BH + tBH)', fontsize=12)
     ax.set_title('Comparaison des Algorithmes: Nord-Ouest vs Balas-Hammer', fontsize=14, fontweight='bold')
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3, axis='y')
@@ -331,12 +318,12 @@ def tracer_comparaison_ratios(resultats, tailles_n):
     
     plt.tight_layout()
     plt.savefig('complexite_comparaison_ratios.png', dpi=300)
-    print("✓ Graphique sauvegardé: complexite_comparaison_ratios.png")
+    print("[OK] Graphique sauvegarde: complexite_comparaison_ratios.png")
     plt.show()
 
 
 def identifier_complexite(tailles, temps_max):
-    """Identifie le type de complexité basé sur l'enveloppe supérieure.
+    """Identifie le type de complexite base sur l'enveloppe superieure.
     
     Teste: O(log n), O(n), O(n log n), O(n²), O(n³), O(k^n)
     Retourne le type ayant le meilleur R²
@@ -378,16 +365,16 @@ def identifier_complexite(tailles, temps_max):
 # ==========================================
 
 def etude_complexite_simple(tailles_n=None, iterations=100):
-    """Effectue l'étude de complexité et exporte en CSV et JSON."""
+    """Effectue l'etude de complexite et exporte en CSV et JSON."""
     
     if tailles_n is None:
         tailles_n = [10, 40, 100, 400]
     
     print("="*70)
-    print("ÉTUDE DE COMPLEXITÉ (VERSION SIMPLIFIÉE)")
+    print("ETUDE DE COMPLEXITE (VERSION SIMPLIFIEE)")
     print("="*70)
-    print(f"Tailles testées: {tailles_n}")
-    print(f"Itérations par taille: {iterations}\n")
+    print(f"Tailles testees: {tailles_n}")
+    print(f"Iterations par taille: {iterations}\n")
     
     resultats = {}
     donnees_csv = []
@@ -401,7 +388,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
         temps_marche_bh_list = []
         
         for iter_num in range(iterations):
-            # Générer un problème aléatoire
+            # Generer un probleme aleatoire
             couts, provisions, commandes = generer_probleme_aleatoire(n)
             
             # Mesurer Nord-Ouest
@@ -413,7 +400,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             except:
                 temps_no_list.append(0)
             
-            # Mesurer Balas-Hammer (réduire stdout)
+            # Mesurer Balas-Hammer (reduire stdout)
             try:
                 from io import StringIO
                 old_stdout = sys.stdout
@@ -429,18 +416,20 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
                 sys.stdout = old_stdout
                 temps_bh_list.append(0)
             
-            # Mesurer marche-pied (simple)
+            # Mesurer marche-pied complet
             try:
+                import copy
                 debut = time.perf_counter()
-                u, v, marginaux, case_opt, base = algo.calculer_potentiels_et_marginaux(couts, prop_no)
+                algo.marche_pied_complet(couts, copy.deepcopy(prop_no), n, n, afficher=False)
                 t_marche_no = time.perf_counter() - debut
                 temps_marche_no_list.append(t_marche_no)
             except:
                 temps_marche_no_list.append(0)
             
             try:
+                import copy
                 debut = time.perf_counter()
-                u, v, marginaux, case_opt, base = algo.calculer_potentiels_et_marginaux(couts, prop_bh)
+                algo.marche_pied_complet(couts, copy.deepcopy(prop_bh), n, n, afficher=False)
                 t_marche_bh = time.perf_counter() - debut
                 temps_marche_bh_list.append(t_marche_bh)
             except:
@@ -449,7 +438,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             if (iter_num + 1) % 20 == 0:
                 print(".", end="", flush=True)
         
-        print(" ✓")
+        print(" [OK]")
         
         # Calculer les statistiques
         max_no = max(temps_no_list) if temps_no_list else 0
@@ -475,13 +464,13 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             'total_bh_max': max_bh + max_marche_bh,
         }
         
-        # Ajouter à la liste CSV
+        # Ajouter a la liste CSV
         donnees_csv.append({
             'n': n,
-            'θNO(n)_max': f"{max_no:.8f}",
-            'θNO(n)_avg': f"{avg_no:.8f}",
-            'θBH(n)_max': f"{max_bh:.8f}",
-            'θBH(n)_avg': f"{avg_bh:.8f}",
+            'theta_NO(n)_max': f"{max_no:.8f}",
+            'theta_NO(n)_avg': f"{avg_no:.8f}",
+            'theta_BH(n)_max': f"{max_bh:.8f}",
+            'theta_BH(n)_avg': f"{avg_bh:.8f}",
             'tNO(n)_max': f"{max_marche_no:.8f}",
             'tNO(n)_avg': f"{avg_marche_no:.8f}",
             'tBH(n)_max': f"{max_marche_bh:.8f}",
@@ -490,8 +479,8 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             'Total_BH_max': f"{max_bh + max_marche_bh:.8f}",
         })
         
-        print(f"  θNO(n)  pire: {max_no:.8f}s | moyen: {avg_no:.8f}s")
-        print(f"  θBH(n)  pire: {max_bh:.8f}s | moyen: {avg_bh:.8f}s")
+        print(f"  theta_NO(n)  pire: {max_no:.8f}s | moyen: {avg_no:.8f}s")
+        print(f"  theta_BH(n)  pire: {max_bh:.8f}s | moyen: {avg_bh:.8f}s")
         print(f"  tNO(n)  pire: {max_marche_no:.8f}s | moyen: {avg_marche_no:.8f}s")
         print(f"  tBH(n)  pire: {max_marche_bh:.8f}s | moyen: {avg_marche_bh:.8f}s")
         print(f"  TOTAL NO pire: {max_no + max_marche_no:.8f}s")
@@ -500,7 +489,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
     
     # Exporter en CSV
     print("\n" + "="*70)
-    print("EXPORT DES DONNÉES")
+    print("EXPORT DES DONNEES")
     print("="*70)
     
     try:
@@ -508,7 +497,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             writer = csv.DictWriter(f, fieldnames=donnees_csv[0].keys())
             writer.writeheader()
             writer.writerows(donnees_csv)
-        print("✓ Fichier CSV sauvegardé: resultats_complexite.csv")
+        print("[OK] Fichier CSV sauvegarde: resultats_complexite.csv")
     except Exception as e:
         print(f"✗ Erreur lors de la sauvegarde CSV: {e}")
     
@@ -516,7 +505,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
     try:
         with open('resultats_complexite.json', 'w', encoding='utf-8') as f:
             json.dump(resultats, f, indent=2)
-        print("✓ Fichier JSON sauvegardé: resultats_complexite.json")
+        print("[OK] Fichier JSON sauvegarde: resultats_complexite.json")
     except Exception as e:
         print(f"✗ Erreur lors de la sauvegarde JSON: {e}")
     
@@ -531,7 +520,7 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
         print(f"n = {n:5d}: Ratio NO/BH = {ratio:.4f} ({meilleur} plus rapide)")
     
     print("\n" + "="*70)
-    print("ÉTUDE TERMINÉE ✓")
+    print("ETUDE TERMINEE [OK]")
     print("="*70)
     
     return resultats, tailles_n
@@ -545,18 +534,18 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
 def afficher_usage():
     """Affiche le message d'aide."""
     print("""
-ÉTUDE DE COMPLEXITÉ - PROBLÈMES DE TRANSPORT
+ETUDE DE COMPLEXITE - PROBLÈMES DE TRANSPORT
 
 Usage:
-    python3 complexite.py              # Exécution complète (graphiques)
+    python3 complexite.py              # Execution complete (graphiques)
     python3 complexite.py --simple     # Version simple (CSV)
     python3 complexite.py --test       # Test rapide (30 secondes)
     python3 complexite.py --help       # Affiche cette aide
 
 Options:
     --help              Affiche cette aide
-    --simple            Exécution sans matplotlib (sortie CSV)
-    --test              Test rapide avec tailles [10, 20] et 10 itérations
+    --simple            Execution sans matplotlib (sortie CSV)
+    --test              Test rapide avec tailles [10, 20] et 10 iterations
     """)
 
 
@@ -570,7 +559,7 @@ if __name__ == "__main__":
         
         elif arg == '--simple':
             print("\n" + "="*70)
-            print("ANALYSE DE COMPLEXITÉ - VERSION SIMPLE (SANS GRAPHIQUES)")
+            print("ANALYSE DE COMPLEXITE - VERSION SIMPLE (SANS GRAPHIQUES)")
             print("="*70 + "\n")
             
             resultats, tailles = etude_complexite_simple(
@@ -582,40 +571,40 @@ if __name__ == "__main__":
         
         elif arg == '--test':
             print("\n" + "="*70)
-            print("TEST RAPIDE DE L'ÉTUDE DE COMPLEXITÉ")
+            print("TEST RAPIDE DE L'ETUDE DE COMPLEXITE")
             print("="*70 + "\n")
             
             resultats, tailles = etude_complexite_simple(
                 tailles_n=[10, 20],
                 iterations=10
             )
-            print("\n✅ Test réussi!")
+            print("\n[OK] Test reussi!")
             sys.exit(0)
         
         else:
-            print(f"❌ Argument inconnu: {arg}")
+            print(f"[ERREUR] Argument inconnu: {arg}")
             afficher_usage()
             sys.exit(1)
     
-    # Exécution par défaut: version complète avec graphiques
+    # Execution par defaut: version complete avec graphiques
     print("\n" + "="*70)
-    print("ANALYSE DE COMPLEXITÉ - PROBLÈMES DE TRANSPORT")
+    print("ANALYSE DE COMPLEXITE - PROBLÈMES DE TRANSPORT")
     print("="*70 + "\n")
     
     if not HAS_MATPLOTLIB:
-        print("⚠ ATTENTION: matplotlib n'est pas installé")
-        print("Les graphiques ne peuvent pas être générés.")
+        print("[ATTENTION] ATTENTION: matplotlib n'est pas installe")
+        print("Les graphiques ne peuvent pas etre generes.")
         print("Pour l'installer: pip install matplotlib numpy")
         print("\nUtilisez: python3 complexite.py --simple")
-        print("pour une exécution sans matplotlib (sortie CSV)\n")
+        print("pour une execution sans matplotlib (sortie CSV)\n")
         sys.exit(1)
     
-    # Effectuer l'étude complète
+    # Effectuer l'etude complete
     resultats, tailles_n = etude_complexite_complete()
     
-    # Identifier les complexités
+    # Identifier les complexites
     print("\n" + "="*70)
-    print("IDENTIFICATION DES COMPLEXITÉS")
+    print("IDENTIFICATION DES COMPLEXITES")
     print("="*70)
     
     maxima_no = [max(resultats[n]['theta_no']) for n in tailles_n]
@@ -628,21 +617,21 @@ if __name__ == "__main__":
     type_marche_no, r2_marche_no = identifier_complexite(tailles_n, maxima_marche_no)
     type_marche_bh, r2_marche_bh = identifier_complexite(tailles_n, maxima_marche_bh)
     
-    print(f"\nθNO(n)  : {type_no} (R² = {r2_no:.4f})")
-    print(f"θBH(n)  : {type_bh} (R² = {r2_bh:.4f})")
+    print(f"\ntheta_NO(n)  : {type_no} (R² = {r2_no:.4f})")
+    print(f"theta_BH(n)  : {type_bh} (R² = {r2_bh:.4f})")
     print(f"tNO(n)  : {type_marche_no} (R² = {r2_marche_no:.4f})")
     print(f"tBH(n)  : {type_marche_bh} (R² = {r2_marche_bh:.4f})")
     
-    # Tracer les résultats
+    # Tracer les resultats
     print("\n" + "="*70)
-    print("GÉNÉRATION DES GRAPHIQUES")
+    print("GENERATION DES GRAPHIQUES")
     print("="*70)
     
     tracer_nuages_de_points(resultats, tailles_n)
     tracer_pire_des_cas(resultats, tailles_n)
     tracer_comparaison_ratios(resultats, tailles_n)
     
-    # Sauvegarder les résultats en JSON
+    # Sauvegarder les resultats en JSON
     donnees_export = {}
     for n in tailles_n:
         donnees_export[str(n)] = {
@@ -655,7 +644,7 @@ if __name__ == "__main__":
     with open('resultats_complexite.json', 'w') as f:
         json.dump(donnees_export, f, indent=2)
     
-    print("\n✓ Résultats sauvegardés dans resultats_complexite.json")
+    print("\n[OK] Resultats sauvegardes dans resultats_complexite.json")
     print("\n" + "="*70)
-    print("ÉTUDE TERMINÉE")
+    print("ETUDE TERMINEE")
     print("="*70)
