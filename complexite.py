@@ -163,10 +163,10 @@ def etude_complexite_complete():
         max_marche_bh = max(temps_marche_bh_list)
         
         print(f"\nResultats pour n = {n}:")
-        print(f"  theta_NO(n)  - Pire cas: {max_no:.8f}s (moyenne: {np.mean(temps_no_list):.8f}s)")
-        print(f"  theta_BH(n)  - Pire cas: {max_bh:.8f}s (moyenne: {np.mean(temps_bh_list):.8f}s)")
-        print(f"  tNO(n)  - Pire cas: {max_marche_no:.8f}s (moyenne: {np.mean(temps_marche_no_list):.8f}s)")
-        print(f"  tBH(n)  - Pire cas: {max_marche_bh:.8f}s (moyenne: {np.mean(temps_marche_bh_list):.8f}s)")
+        print(f"  theta_NO(n)  - Pire cas: {max_no:.8f}s")
+        print(f"  theta_BH(n)  - Pire cas: {max_bh:.8f}s")
+        print(f"  tNO(n)  - Pire cas: {max_marche_no:.8f}s")
+        print(f"  tBH(n)  - Pire cas: {max_marche_bh:.8f}s")
         print(f"  Total NO - Pire cas: {max_no + max_marche_no:.8f}s")
         print(f"  Total BH - Pire cas: {max_bh + max_marche_bh:.8f}s")
     
@@ -464,50 +464,13 @@ def etude_complexite_simple(tailles_n=None, iterations=100):
             'total_bh_max': max_bh + max_marche_bh,
         }
         
-        # Ajouter a la liste CSV
-        donnees_csv.append({
-            'n': n,
-            'theta_NO(n)_max': f"{max_no:.8f}",
-            'theta_NO(n)_avg': f"{avg_no:.8f}",
-            'theta_BH(n)_max': f"{max_bh:.8f}",
-            'theta_BH(n)_avg': f"{avg_bh:.8f}",
-            'tNO(n)_max': f"{max_marche_no:.8f}",
-            'tNO(n)_avg': f"{avg_marche_no:.8f}",
-            'tBH(n)_max': f"{max_marche_bh:.8f}",
-            'tBH(n)_avg': f"{avg_marche_bh:.8f}",
-            'Total_NO_max': f"{max_no + max_marche_no:.8f}",
-            'Total_BH_max': f"{max_bh + max_marche_bh:.8f}",
-        })
-        
-        print(f"  theta_NO(n)  pire: {max_no:.8f}s | moyen: {avg_no:.8f}s")
-        print(f"  theta_BH(n)  pire: {max_bh:.8f}s | moyen: {avg_bh:.8f}s")
-        print(f"  tNO(n)  pire: {max_marche_no:.8f}s | moyen: {avg_marche_no:.8f}s")
-        print(f"  tBH(n)  pire: {max_marche_bh:.8f}s | moyen: {avg_marche_bh:.8f}s")
+        print(f"  theta_NO(n)  pire: {max_no:.8f}s")
+        print(f"  theta_BH(n)  pire: {max_bh:.8f}s")
+        print(f"  tNO(n)  pire: {max_marche_no:.8f}s")
+        print(f"  tBH(n)  pire: {max_marche_bh:.8f}s")
         print(f"  TOTAL NO pire: {max_no + max_marche_no:.8f}s")
         print(f"  TOTAL BH pire: {max_bh + max_marche_bh:.8f}s")
         print()
-    
-    # Exporter en CSV
-    print("\n" + "="*70)
-    print("EXPORT DES DONNEES")
-    print("="*70)
-    
-    try:
-        with open('resultats_complexite.csv', 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=donnees_csv[0].keys())
-            writer.writeheader()
-            writer.writerows(donnees_csv)
-        print("[OK] Fichier CSV sauvegarde: resultats_complexite.csv")
-    except Exception as e:
-        print(f"✗ Erreur lors de la sauvegarde CSV: {e}")
-    
-    # Exporter en JSON
-    try:
-        with open('resultats_complexite.json', 'w', encoding='utf-8') as f:
-            json.dump(resultats, f, indent=2)
-        print("[OK] Fichier JSON sauvegarde: resultats_complexite.json")
-    except Exception as e:
-        print(f"✗ Erreur lors de la sauvegarde JSON: {e}")
     
     # Afficher les conclusions
     print("\n" + "="*70)
