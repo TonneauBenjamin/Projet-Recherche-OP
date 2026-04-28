@@ -116,6 +116,39 @@ def sauvegarder_resultats(resultats):
         print(f"[ERREUR] Impossible de sauvegarder le checkpoint: {e}")
 
 
+def exporter_resultats_formules():
+    """Exporte les resultats du checkpoint dans un format personnalise."""
+    resultats = charger_resultats_existants()
+    
+    if not resultats:
+        print("[ERREUR] Aucun checkpoint trouve")
+        return
+    
+    tailles_n = sorted([int(k) for k in resultats.keys()])
+    donnees_export = {}
+    
+    for n in tailles_n:
+        donnees_export[str(n)] = {
+            'n': n,
+            'iterations': len(resultats[n]['theta_no']),
+            'no_max': max(resultats[n]['theta_no']),
+            'no_moy': sum(resultats[n]['theta_no']) / len(resultats[n]['theta_no']),
+            'bh_max': max(resultats[n]['theta_bh']),
+            'bh_moy': sum(resultats[n]['theta_bh']) / len(resultats[n]['theta_bh']),
+            'marche_no_max': max(resultats[n]['t_marche_no']),
+            'marche_no_moy': sum(resultats[n]['t_marche_no']) / len(resultats[n]['t_marche_no']),
+            'marche_bh_max': max(resultats[n]['t_marche_bh']),
+            'marche_bh_moy': sum(resultats[n]['t_marche_bh']) / len(resultats[n]['t_marche_bh']),
+        }
+    
+    with open('resultats_complexite.json', 'w') as f:
+        json.dump(donnees_export, f, indent=2)
+    
+    print("[OK] Resultats sauvegardes dans resultats_complexite.json")
+    return donnees_export
+
+
+
 # ==========================================
 # ETUDE DE COMPLEXITE
 # ==========================================
@@ -204,7 +237,6 @@ def etude_complexite_complete():
             tracer_nuages_de_points(resultats, tailles_disponibles)
             tracer_pire_des_cas(resultats, tailles_disponibles)
             tracer_comparaison_ratios(resultats, tailles_disponibles)
-        print(f"  Total BH - Pire cas: {max_bh + max_marche_bh:.8f}s")
     
     return resultats, tailles_n
 
@@ -276,7 +308,7 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.grid(True, alpha=0.3)
     
     # 6. (theta_BH + tBH)(n)
-    ax = axes[1, 2]
+    ax = axes[1, 2] 
     for n in tailles_n:
         totaux = [resultats[n]['theta_bh'][i] + resultats[n]['t_marche_bh'][i] 
                   for i in range(len(resultats[n]['theta_bh']))]
@@ -457,14 +489,20 @@ def run_complexite():
         tracer_pire_des_cas(resultats, tailles_n)
         tracer_comparaison_ratios(resultats, tailles_n)
         
-        # Sauvegarder les resultats en JSON
+        # Sauvegarder les resultats en JSON avec format personnalise
         donnees_export = {}
         for n in tailles_n:
             donnees_export[str(n)] = {
-                'theta_no_max': max(resultats[n]['theta_no']),
-                'theta_bh_max': max(resultats[n]['theta_bh']),
-                't_marche_no_max': max(resultats[n]['t_marche_no']),
-                't_marche_bh_max': max(resultats[n]['t_marche_bh']),
+                'n': n,
+                'iterations': len(resultats[n]['theta_no']),
+                'no_max': max(resultats[n]['theta_no']),
+                'no_moy': sum(resultats[n]['theta_no']) / len(resultats[n]['theta_no']),
+                'bh_max': max(resultats[n]['theta_bh']),
+                'bh_moy': sum(resultats[n]['theta_bh']) / len(resultats[n]['theta_bh']),
+                'marche_no_max': max(resultats[n]['t_marche_no']),
+                'marche_no_moy': sum(resultats[n]['t_marche_no']) / len(resultats[n]['t_marche_no']),
+                'marche_bh_max': max(resultats[n]['t_marche_bh']),
+                'marche_bh_moy': sum(resultats[n]['t_marche_bh']) / len(resultats[n]['t_marche_bh']),
             }
         
         with open('resultats_complexite.json', 'w') as f:
