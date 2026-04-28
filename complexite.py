@@ -81,6 +81,42 @@ def mesurer_marche_pied(couts, prop_initiale):
 
 
 # ==========================================
+# GESTION DES CHECKPOINTS
+# ==========================================
+
+def charger_resultats_existants():
+    """Charge les resultats sauvegardes depuis le fichier de checkpoint."""
+    fichier_checkpoint = 'checkpoint_complexite.json'
+    if os.path.exists(fichier_checkpoint):
+        try:
+            with open(fichier_checkpoint, 'r') as f:
+                resultats = json.load(f)
+            # Convertir les cles en entiers
+            resultats = {int(k): v for k, v in resultats.items()}
+            print(f"[INFO] Checkpoint charge depuis {fichier_checkpoint}")
+            return resultats
+        except Exception as e:
+            print(f"[WARNING] Erreur lors du chargement du checkpoint: {e}")
+            return {}
+    else:
+        print("[INFO] Aucun checkpoint trouve, demarrage d'une nouvelle etude")
+        return {}
+
+
+def sauvegarder_resultats(resultats):
+    """Sauvegarde les resultats dans le fichier de checkpoint."""
+    fichier_checkpoint = 'checkpoint_complexite.json'
+    try:
+        # Convertir les cles en chaines pour JSON
+        resultats_str = {str(k): v for k, v in resultats.items()}
+        with open(fichier_checkpoint, 'w') as f:
+            json.dump(resultats_str, f, indent=2)
+        print(f"[OK] Checkpoint sauvegarde dans {fichier_checkpoint}")
+    except Exception as e:
+        print(f"[ERREUR] Impossible de sauvegarder le checkpoint: {e}")
+
+
+# ==========================================
 # ETUDE DE COMPLEXITE
 # ==========================================
 
@@ -97,8 +133,8 @@ def etude_complexite_complete():
     tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  
     iterations = 100 
      
-    # Stockage des resultats
-    resultats = {}
+    # Charger les resultats existants si disponibles
+    resultats = charger_resultats_existants()
     
     print("="*70)
     print("ETUDE DE COMPLEXITE - PROBLÈMES DE TRANSPORT")
@@ -108,16 +144,26 @@ def etude_complexite_complete():
     print()
     
     for n in tailles_n:
+        # Verifier si cette taille est deja completee
+        if n in resultats and len(resultats[n]['theta_no']) == iterations:
+            print(f"\n{'='*70}")
+            print(f"TAILLE n = {n} - DEJA COMPLETEE")
+            print(f"{'='*70}")
+            continue
+            
         print(f"\n{'='*70}")
         print(f"TAILLE n = {n}")
         print(f"{'='*70}")
         
-        temps_no_list = []
-        temps_bh_list = []
-        temps_marche_no_list = []
-        temps_marche_bh_list = []
+        temps_no_list = resultats.get(n, {}).get('theta_no', [])
+        temps_bh_list = resultats.get(n, {}).get('theta_bh', [])
+        temps_marche_no_list = resultats.get(n, {}).get('t_marche_no', [])
+        temps_marche_bh_list = resultats.get(n, {}).get('t_marche_bh', [])
         
-        for iter_num in range(iterations):
+        # Continuer depuis ou on s'est arrete
+        start_iter = len(temps_no_list)
+        
+        for iter_num in range(start_iter, iterations):
             # Generer un probleme aleatoire
             couts, provisions, commandes = generer_probleme_aleatoire(n)
             
@@ -140,7 +186,7 @@ def etude_complexite_complete():
             if (iter_num + 1) % 10 == 0:
                 print(f"  Iteration {iter_num + 1}/{iterations} completee")
         
-        # Calculer les statistiques
+        # Sauvegarder les resultats pour cette taille
         resultats[n] = {
             'theta_no': temps_no_list,
             'theta_bh': temps_bh_list,
@@ -148,18 +194,16 @@ def etude_complexite_complete():
             't_marche_bh': temps_marche_bh_list,
         }
         
-        # Afficher les resultats pour cette taille
-        max_no = max(temps_no_list)
-        max_bh = max(temps_bh_list)
-        max_marche_no = max(temps_marche_no_list)
-        max_marche_bh = max(temps_marche_bh_list)
+        # Checkpoint: sauvegarder apres chaque taille n
+        sauvegarder_resultats(resultats)
         
-        print(f"\nResultats pour n = {n}:")
-        print(f"  theta_NO(n)  - Pire cas: {max_no:.8f}s")
-        print(f"  theta_BH(n)  - Pire cas: {max_bh:.8f}s")
-        print(f"  tNO(n)  - Pire cas: {max_marche_no:.8f}s")
-        print(f"  tBH(n)  - Pire cas: {max_marche_bh:.8f}s")
-        print(f"  Total NO - Pire cas: {max_no + max_marche_no:.8f}s")
+        # Mettre a jour les graphiques avec les donnees actuelles
+        tailles_disponibles = [k for k in resultats.keys() if len(resultats[k]['theta_no']) == iterations]
+        tailles_disponibles.sort()
+        if tailles_disponibles:
+            tracer_nuages_de_points(resultats, tailles_disponibles)
+            tracer_pire_des_cas(resultats, tailles_disponibles)
+            tracer_comparaison_ratios(resultats, tailles_disponibles)
         print(f"  Total BH - Pire cas: {max_bh + max_marche_bh:.8f}s")
     
     return resultats, tailles_n
@@ -380,52 +424,64 @@ def run_complexite():
     # Effectuer l'etude complete
     resultats, tailles_n = etude_complexite_complete()
     
-    # Identifier les complexites
-    print("\n" + "="*70)
-    print("IDENTIFICATION DES COMPLEXITES")
-    print("="*70)
+    # Verifier si toutes les tailles sont completes
+    tailles_completees = [n for n in tailles_n if n in resultats and len(resultats[n]['theta_no']) == 100]
     
-    maxima_no = [max(resultats[n]['theta_no']) for n in tailles_n]
-    maxima_bh = [max(resultats[n]['theta_bh']) for n in tailles_n]
-    maxima_marche_no = [max(resultats[n]['t_marche_no']) for n in tailles_n]
-    maxima_marche_bh = [max(resultats[n]['t_marche_bh']) for n in tailles_n]
-    
-    type_no, r2_no = identifier_complexite(tailles_n, maxima_no)
-    type_bh, r2_bh = identifier_complexite(tailles_n, maxima_bh)
-    type_marche_no, r2_marche_no = identifier_complexite(tailles_n, maxima_marche_no)
-    type_marche_bh, r2_marche_bh = identifier_complexite(tailles_n, maxima_marche_bh)
-    
-    print(f"\ntheta_NO(n)  : {type_no} (R² = {r2_no:.4f})")
-    print(f"theta_BH(n)  : {type_bh} (R² = {r2_bh:.4f})")
-    print(f"tNO(n)  : {type_marche_no} (R² = {r2_marche_no:.4f})")
-    print(f"tBH(n)  : {type_marche_bh} (R² = {r2_marche_bh:.4f})")
-    
-    # Tracer les resultats
-    print("\n" + "="*70)
-    print("GENERATION DES GRAPHIQUES")
-    print("="*70)
-    
-    tracer_nuages_de_points(resultats, tailles_n)
-    tracer_pire_des_cas(resultats, tailles_n)
-    tracer_comparaison_ratios(resultats, tailles_n)
-    
-    # Sauvegarder les resultats en JSON
-    donnees_export = {}
-    for n in tailles_n:
-        donnees_export[str(n)] = {
-            'theta_no_max': max(resultats[n]['theta_no']),
-            'theta_bh_max': max(resultats[n]['theta_bh']),
-            't_marche_no_max': max(resultats[n]['t_marche_no']),
-            't_marche_bh_max': max(resultats[n]['t_marche_bh']),
-        }
-    
-    with open('resultats_complexite.json', 'w') as f:
-        json.dump(donnees_export, f, indent=2)
-    
-    print("\n[OK] Resultats sauvegardes dans resultats_complexite.json")
-    print("\n" + "="*70)
-    print("ETUDE TERMINEE")
-    print("="*70)
+    if len(tailles_completees) == len(tailles_n):
+        # Toutes les tailles sont completes, proceder a l'identification et aux graphiques finaux
+        print("\n" + "="*70)
+        print("IDENTIFICATION DES COMPLEXITES")
+        print("="*70)
+        
+        maxima_no = [max(resultats[n]['theta_no']) for n in tailles_n]
+        maxima_bh = [max(resultats[n]['theta_bh']) for n in tailles_n]
+        maxima_marche_no = [max(resultats[n]['t_marche_no']) for n in tailles_n]
+        maxima_marche_bh = [max(resultats[n]['t_marche_bh']) for n in tailles_n]
+        
+        type_no, r2_no = identifier_complexite(tailles_n, maxima_no)
+        type_bh, r2_bh = identifier_complexite(tailles_n, maxima_bh)
+        type_marche_no, r2_marche_no = identifier_complexite(tailles_n, maxima_marche_no)
+        type_marche_bh, r2_marche_bh = identifier_complexite(tailles_n, maxima_marche_bh)
+        
+        print(f"\ntheta_NO(n)  : {type_no} (R² = {r2_no:.4f})")
+        print(f"theta_BH(n)  : {type_bh} (R² = {r2_bh:.4f})")
+        print(f"tNO(n)  : {type_marche_no} (R² = {r2_marche_no:.4f})")
+        print(f"tBH(n)  : {type_marche_bh} (R² = {r2_marche_bh:.4f})")
+        
+        # Tracer les resultats finaux
+        print("\n" + "="*70)
+        print("GENERATION DES GRAPHIQUES FINAUX")
+        print("="*70)
+        
+        tracer_nuages_de_points(resultats, tailles_n)
+        tracer_pire_des_cas(resultats, tailles_n)
+        tracer_comparaison_ratios(resultats, tailles_n)
+        
+        # Sauvegarder les resultats en JSON
+        donnees_export = {}
+        for n in tailles_n:
+            donnees_export[str(n)] = {
+                'theta_no_max': max(resultats[n]['theta_no']),
+                'theta_bh_max': max(resultats[n]['theta_bh']),
+                't_marche_no_max': max(resultats[n]['t_marche_no']),
+                't_marche_bh_max': max(resultats[n]['t_marche_bh']),
+            }
+        
+        with open('resultats_complexite.json', 'w') as f:
+            json.dump(donnees_export, f, indent=2)
+        
+        print("\n[OK] Resultats sauvegardes dans resultats_complexite.json")
+        print("\n" + "="*70)
+        print("ETUDE TERMINEE")
+        print("="*70)
+    else:
+        print("\n" + "="*70)
+        print("ETUDE EN COURS")
+        print("="*70)
+        print(f"Tailles completees: {tailles_completees}")
+        print(f"Tailles restantes: {[n for n in tailles_n if n not in tailles_completees]}")
+        print("Relancer le programme pour continuer l'etude.")
+        print("="*70)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
