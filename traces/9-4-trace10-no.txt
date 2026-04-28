@@ -1,8 +1,0 @@
-Méthode: Nord Ouest
-Trace:
-Allocation directe (pas de traçage détaillé)
-Allocation finale:
-500 0 0 0 0 0 0
-0 500 0 0 0 0 0
-0 0 500 500 500 500 500
-Coût total: 218500
