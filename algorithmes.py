@@ -136,7 +136,6 @@ def algo_balas_hammer(couts, provisions, commandes, silencieux=False):
     prop = [[0] * m for _ in range(n)]
     prov, cmd = provisions.copy(), commandes.copy()
     actif = [[couts[i][j] for j in range(m)] for i in range(n)]
-
     etape = 1
     while sum(prov) > 0 and sum(cmd) > 0:
         pen_l = [penalite(actif[i]) if prov[i] > 0 else -1 for i in range(n)]
@@ -148,7 +147,6 @@ def algo_balas_hammer(couts, provisions, commandes, silencieux=False):
         # Trouver toutes les lignes/colonnes de penalite maximale
         lignes_max = [i for i in range(n) if pen_l[i] == max_pl and max_pl >= 0]
         colonnes_max = [j for j in range(m) if pen_c[j] == max_pc and max_pc >= 0]
-
         if not silencieux:
             print(f"\n  Etape {etape}:")
             print(f"    Penalites lignes   : {pen_l}   -> max = {max_pl}", end="")
@@ -258,20 +256,16 @@ def test_acyclique_bfs(base, n, m, afficher=True):
 
 def _reconstruire_cycle_bfs(parent, u, v, n):
     """Reconstruit un cycle a partir du BFS ou u et v sont les 2 extremites."""
-    # Remonter les chemins de u et v vers leur ancetre commun
     chemin_u = []
     x = u
     while x != -1:
         chemin_u.append(x)
         x = parent[x]
-
     chemin_v = []
     x = v
     while x != -1:
         chemin_v.append(x)
         x = parent[x]
-
-    # Trouver l'ancetre commun
     set_u = set(chemin_u)
     ancetre = -1
     for x in chemin_v:
@@ -434,7 +428,6 @@ def calculer_potentiels_et_marginaux(couts, prop, n=None, m=None, afficher=True,
     if afficher:
         print(f"\n  Nombre d'aretes dans la base : {len(base)}  (attendu pour arbre : {n + m - 1})")
 
-    # --- Test d'acyclicite (BFS) ---
     est_acyclique, cycle_aretes = test_acyclique_bfs(base, n, m, afficher=afficher)
 
     if not est_acyclique and cycle_aretes:
@@ -458,14 +451,12 @@ def calculer_potentiels_et_marginaux(couts, prop, n=None, m=None, afficher=True,
             # Reconstruire la base
             base = set((i, j) for i in range(n) for j in range(m) if prop[i][j] > 0)
 
-    # --- Test de connexite (BFS) ---
     est_connexe, composantes = test_connexe_bfs(base, n, m, afficher=afficher)
 
     aretes_ajoutees = []
     if not est_connexe:
         base, aretes_ajoutees = rendre_connexe(base, couts, n, m, afficher=afficher)
 
-    # --- Calcul des potentiels : Ui + Vj = Cij sur chaque case de base ---
     u, v = [None] * n, [None] * m
     u[0] = 0
 
@@ -483,10 +474,7 @@ def calculer_potentiels_et_marginaux(couts, prop, n=None, m=None, afficher=True,
     u = [0 if x is None else x for x in u]
     v = [0 if x is None else x for x in v]
 
-    # --- Table des couts potentiels (Eij = Ui + Vj) ---
     couts_potentiels = [[u[i] + v[j] for j in range(m)] for i in range(n)]
-
-    # --- Couts marginaux sur les cases hors base ---
     marginaux = [[None] * m for _ in range(n)]
     min_marg, case_amel = 0, None
 

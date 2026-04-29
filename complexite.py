@@ -197,29 +197,23 @@ def etude_complexite_complete():
         start_iter = len(temps_no_list)
         
         for iter_num in range(start_iter, iterations):
-            # Generer un probleme aleatoire
             couts, provisions, commandes = generer_probleme_aleatoire(n)
             
-            # 1. Mesurer Nord-Ouest
             t_no, prop_no = mesurer_nord_ouest(provisions, commandes)
             temps_no_list.append(t_no)
             
-            # 2. Mesurer Balas-Hammer
             t_bh, prop_bh = mesurer_balas_hammer(couts, provisions, commandes)
             temps_bh_list.append(t_bh)
             
-            # 3. Mesurer marche-pied avec Nord-Ouest
             t_marche_no = mesurer_marche_pied(couts, prop_no)
             temps_marche_no_list.append(t_marche_no)
             
-            # 4. Mesurer marche-pied avec Balas-Hammer
             t_marche_bh = mesurer_marche_pied(couts, prop_bh)
             temps_marche_bh_list.append(t_marche_bh)
             
             if (iter_num + 1) % 10 == 0:
                 print(f"  Iteration {iter_num + 1}/{iterations} completee")
         
-        # Sauvegarder les resultats pour cette taille
         resultats[n] = {
             'theta_no': temps_no_list,
             'theta_bh': temps_bh_list,
@@ -227,10 +221,7 @@ def etude_complexite_complete():
             't_marche_bh': temps_marche_bh_list,
         }
         
-        # Checkpoint: sauvegarder apres chaque taille n
         sauvegarder_resultats(resultats)
-        
-        # Mettre a jour les graphiques avec les donnees actuelles
         tailles_disponibles = [k for k in resultats.keys() if len(resultats[k]['theta_no']) == iterations]
         tailles_disponibles.sort()
         if tailles_disponibles:
@@ -251,7 +242,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     fig.suptitle('Etude de Complexite - Nuages de Points', fontsize=16, fontweight='bold')
     
-    # 1. theta_NO(n)
     ax = axes[0, 0]
     for n in tailles_n:
         x = [n] * len(resultats[n]['theta_no'])
@@ -262,7 +252,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('theta_NO(n) - Nord-Ouest')
     ax.grid(True, alpha=0.3)
     
-    # 2. theta_BH(n)
     ax = axes[0, 1]
     for n in tailles_n:
         x = [n] * len(resultats[n]['theta_bh'])
@@ -273,7 +262,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('theta_BH(n) - Balas-Hammer')
     ax.grid(True, alpha=0.3)
     
-    # 3. tNO(n)
     ax = axes[0, 2]
     for n in tailles_n:
         x = [n] * len(resultats[n]['t_marche_no'])
@@ -284,7 +272,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('tNO(n) - Marche-pied + Nord-Ouest')
     ax.grid(True, alpha=0.3)
     
-    # 4. tBH(n)
     ax = axes[1, 0]
     for n in tailles_n:
         x = [n] * len(resultats[n]['t_marche_bh'])
@@ -295,7 +282,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('tBH(n) - Marche-pied + Balas-Hammer')
     ax.grid(True, alpha=0.3)
     
-    # 5. (theta_NO + tNO)(n)
     ax = axes[1, 1]
     for n in tailles_n:
         totaux = [resultats[n]['theta_no'][i] + resultats[n]['t_marche_no'][i] 
@@ -307,7 +293,6 @@ def tracer_nuages_de_points(resultats, tailles_n):
     ax.set_title('(theta_NO + tNO)(n) - Total Nord-Ouest')
     ax.grid(True, alpha=0.3)
     
-    # 6. (theta_BH + tBH)(n)
     ax = axes[1, 2] 
     for n in tailles_n:
         totaux = [resultats[n]['theta_bh'][i] + resultats[n]['t_marche_bh'][i] 
@@ -330,7 +315,6 @@ def tracer_pire_des_cas(resultats, tailles_n):
     
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     
-    # Extraire les maxima pour chaque n
     maxima_no = [max(resultats[n]['theta_no']) for n in tailles_n]
     maxima_bh = [max(resultats[n]['theta_bh']) for n in tailles_n]
     maxima_marche_no = [max(resultats[n]['t_marche_no']) for n in tailles_n]
@@ -380,7 +364,6 @@ def tracer_comparaison_ratios(resultats, tailles_n):
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3, axis='y')
     
-    # Ajouter les valeurs sur les barres
     for i, (n, r) in enumerate(zip(tailles_n, ratios)):
         ax.text(n, r + 0.05, f'{r:.3f}', ha='center', fontsize=10)
     
@@ -408,15 +391,12 @@ def identifier_complexite(tailles, temps_max):
     meilleur_r2 = -np.inf
     
     for nom, func in types_complexite.items():
-        # Ajuster les temps avec la fonction
         y_pred = np.array([func(n) for n in tailles])
         y_true = np.array(temps_max)
         
-        # Normaliser pour comparer
         y_pred_norm = y_pred / np.max(y_pred)
         y_true_norm = y_true / np.max(y_true)
         
-        # Calculer R²
         ss_res = np.sum((y_true_norm - y_pred_norm) ** 2)
         ss_tot = np.sum((y_true_norm - np.mean(y_true_norm)) ** 2)
         r2 = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
@@ -453,14 +433,11 @@ def run_complexite():
     print("ANALYSE DE COMPLEXITE - PROBLÈMES DE TRANSPORT")
     print("="*70 + "\n")
     
-    # Effectuer l'etude complete
     resultats, tailles_n = etude_complexite_complete()
     
-    # Verifier si toutes les tailles sont completes
     tailles_completees = [n for n in tailles_n if n in resultats and len(resultats[n]['theta_no']) == 100]
     
     if len(tailles_completees) == len(tailles_n):
-        # Toutes les tailles sont completes, proceder a l'identification et aux graphiques finaux
         print("\n" + "="*70)
         print("IDENTIFICATION DES COMPLEXITES")
         print("="*70)
@@ -480,7 +457,6 @@ def run_complexite():
         print(f"tNO(n)  : {type_marche_no} (R² = {r2_marche_no:.4f})")
         print(f"tBH(n)  : {type_marche_bh} (R² = {r2_marche_bh:.4f})")
         
-        # Tracer les resultats finaux
         print("\n" + "="*70)
         print("GENERATION DES GRAPHIQUES FINAUX")
         print("="*70)
@@ -489,7 +465,6 @@ def run_complexite():
         tracer_pire_des_cas(resultats, tailles_n)
         tracer_comparaison_ratios(resultats, tailles_n)
         
-        # Sauvegarder les resultats en JSON avec format personnalise
         donnees_export = {}
         for n in tailles_n:
             donnees_export[str(n)] = {

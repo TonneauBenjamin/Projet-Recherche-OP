@@ -21,10 +21,8 @@ class Logger:
         self.log.flush()
 
 
-# ── A MODIFIER selon votre equipe ──────────────────────────────────────────────
-EQUIPE = "4"   # numero d'equipe (ex: "4")
-GROUPE = "BN"  # prefixe groupe (ex: "BN")
-# ───────────────────────────────────────────────────────────────────────────────
+EQUIPE = "4"   
+GROUPE = "9"  
 
 
 def main():
@@ -54,7 +52,6 @@ def main():
                 print(f"Erreur lors de l'import de l'etude de complexite : {e}")
             continue
 
-        # Si ce n'est ni Q ni C, c'est censé être un numéro de problème
         num_prob = choix
         fichier = f"entrees/probleme{num_prob}.txt"
 
@@ -99,11 +96,9 @@ def _resoudre(n, m, couts, prov, cmd, choix, methode, num_prob):
     print(f"  Fournisseurs : {n}   Clients : {m}")
     print(f"{'=' * 60}")
 
-    # Affichage du tableau des couts avec provisions et commandes
     algo.afficher_matrice(couts, titres_l, titres_c, "TABLEAU DES COUTS",
                           provisions=prov, commandes=cmd)
 
-    # --- Proposition initiale ---
     if choix == "1":
         print("\n--- Methode Nord-Ouest ---")
         prop = algo.algo_nord_ouest(prov, cmd)
@@ -116,7 +111,6 @@ def _resoudre(n, m, couts, prov, cmd, choix, methode, num_prob):
     cout_initial = algo.calculer_cout_total(couts, prop)
     print(f"Cout initial : {cout_initial}")
 
-    # --- Boucle Marche-Pied avec potentiel ---
     print(f"\n{'=' * 60}")
     print(f"  METHODE DU MARCHE-PIED AVEC POTENTIEL")
     print(f"{'=' * 60}")
