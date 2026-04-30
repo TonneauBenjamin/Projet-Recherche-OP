@@ -103,6 +103,41 @@ def charger_resultats_existants():
         return {}
 
 
+def generer_resume_checkpoint(resultats, fichier_resume='resultats_complexite.json'):
+    """Genere le resume JSON des resultats de complexite."""
+    donnees_resume = {}
+    for n in sorted(resultats.keys()):
+        theta_no = resultats[n].get('theta_no', [])
+        theta_bh = resultats[n].get('theta_bh', [])
+        t_marche_no = resultats[n].get('t_marche_no', [])
+        t_marche_bh = resultats[n].get('t_marche_bh', [])
+
+        no_max = max(theta_no) if theta_no else 0
+        bh_max = max(theta_bh) if theta_bh else 0
+        marche_no_max = max(t_marche_no) if t_marche_no else 0
+        marche_bh_max = max(t_marche_bh) if t_marche_bh else 0
+
+        donnees_resume[str(n)] = {
+            'n': n,
+            'iterations': len(theta_no),
+            'theta_NO_pire_cas': no_max,
+            'theta_BH_pire_cas': bh_max,
+            'tNO_pire_cas': marche_no_max,
+            'tBH_pire_cas': marche_bh_max,
+            'total_NO_pire_cas': no_max + marche_no_max,
+            'total_BH_pire_cas': bh_max + marche_bh_max,
+        }
+
+    try:
+        with open(fichier_resume, 'w') as f:
+            json.dump(donnees_resume, f, indent=2)
+        print(f"[OK] Resume sauvegarde dans {fichier_resume}")
+    except Exception as e:
+        print(f"[ERREUR] Impossible de sauvegarder le resume: {e}")
+
+    return donnees_resume
+
+
 def sauvegarder_resultats(resultats):
     """Sauvegarde les resultats dans le fichier de checkpoint."""
     fichier_checkpoint = 'checkpoint_complexite.json'
@@ -112,6 +147,7 @@ def sauvegarder_resultats(resultats):
         with open(fichier_checkpoint, 'w') as f:
             json.dump(resultats_str, f, indent=2)
         print(f"[OK] Checkpoint sauvegarde dans {fichier_checkpoint}")
+        generer_resume_checkpoint(resultats)
     except Exception as e:
         print(f"[ERREUR] Impossible de sauvegarder le checkpoint: {e}")
 
@@ -124,28 +160,7 @@ def exporter_resultats_formules():
         print("[ERREUR] Aucun checkpoint trouve")
         return
     
-    tailles_n = sorted([int(k) for k in resultats.keys()])
-    donnees_export = {}
-    
-    for n in tailles_n:
-        donnees_export[str(n)] = {
-            'n': n,
-            'iterations': len(resultats[n]['theta_no']),
-            'no_max': max(resultats[n]['theta_no']),
-            'no_moy': sum(resultats[n]['theta_no']) / len(resultats[n]['theta_no']),
-            'bh_max': max(resultats[n]['theta_bh']),
-            'bh_moy': sum(resultats[n]['theta_bh']) / len(resultats[n]['theta_bh']),
-            'marche_no_max': max(resultats[n]['t_marche_no']),
-            'marche_no_moy': sum(resultats[n]['t_marche_no']) / len(resultats[n]['t_marche_no']),
-            'marche_bh_max': max(resultats[n]['t_marche_bh']),
-            'marche_bh_moy': sum(resultats[n]['t_marche_bh']) / len(resultats[n]['t_marche_bh']),
-        }
-    
-    with open('resultats_complexite.json', 'w') as f:
-        json.dump(donnees_export, f, indent=2)
-    
-    print("[OK] Resultats sauvegardes dans resultats_complexite.json")
-    return donnees_export
+    return generer_resume_checkpoint(resultats)
 
 
 
@@ -164,7 +179,7 @@ def etude_complexite_complete():
     """
     
     tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  
-    iterations = 100 
+    iterations = 10
      
     # Charger les resultats existants si disponibles
     resultats = charger_resultats_existants()
@@ -225,9 +240,7 @@ def etude_complexite_complete():
         tailles_disponibles = [k for k in resultats.keys() if len(resultats[k]['theta_no']) == iterations]
         tailles_disponibles.sort()
         if tailles_disponibles:
-            tracer_nuages_de_points(resultats, tailles_disponibles)
-            tracer_pire_des_cas(resultats, tailles_disponibles)
-            tracer_comparaison_ratios(resultats, tailles_disponibles)
+            tracer_tous_les_plots(resultats, tailles_disponibles)
     
     return resultats, tailles_n
 
@@ -236,141 +249,199 @@ def etude_complexite_complete():
 # TRAÇAGE DES RESULTATS
 # ==========================================
 
-def tracer_nuages_de_points(resultats, tailles_n):
-    """Trace les nuages de points avec les 100 valeurs pour chaque n."""
-    
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-    fig.suptitle('Etude de Complexite - Nuages de Points', fontsize=16, fontweight='bold')
-    
-    ax = axes[0, 0]
-    for n in tailles_n:
-        x = [n] * len(resultats[n]['theta_no'])
-        y = resultats[n]['theta_no']
-        ax.scatter(x, y, alpha=0.6, s=30)
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('theta_NO(n) - Nord-Ouest')
-    ax.grid(True, alpha=0.3)
-    
-    ax = axes[0, 1]
-    for n in tailles_n:
-        x = [n] * len(resultats[n]['theta_bh'])
-        y = resultats[n]['theta_bh']
-        ax.scatter(x, y, alpha=0.6, s=30, color='orange')
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('theta_BH(n) - Balas-Hammer')
-    ax.grid(True, alpha=0.3)
-    
-    ax = axes[0, 2]
-    for n in tailles_n:
-        x = [n] * len(resultats[n]['t_marche_no'])
-        y = resultats[n]['t_marche_no']
-        ax.scatter(x, y, alpha=0.6, s=30, color='green')
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('tNO(n) - Marche-pied + Nord-Ouest')
-    ax.grid(True, alpha=0.3)
-    
-    ax = axes[1, 0]
-    for n in tailles_n:
-        x = [n] * len(resultats[n]['t_marche_bh'])
-        y = resultats[n]['t_marche_bh']
-        ax.scatter(x, y, alpha=0.6, s=30, color='red')
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('tBH(n) - Marche-pied + Balas-Hammer')
-    ax.grid(True, alpha=0.3)
-    
+
+def _extraire_temps(resultats, n, cle_principale, cle_secondaire=None):
+    """Retourne la série de temps en utilisant une clé principale ou un fallback."""
+    if cle_principale in resultats[n]:
+        return resultats[n][cle_principale]
+    if cle_secondaire and cle_secondaire in resultats[n]:
+        return resultats[n][cle_secondaire]
+    return []
+
+
+def tracer_nuages(resultats, tailles):
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8))
+    fig.suptitle('Nuages de points - 100 réalisations par taille n', fontsize=16, fontweight='bold')
+
+    series = [
+        ('theta_no', 'θ_NO(n)', 'steelblue', 0, 0),
+        ('theta_bh', 'θ_BH(n)', 'darkorange', 0, 1),
+        ('t_no', 't_NO(n)', 'seagreen', 0, 2),
+        ('t_bh', 't_BH(n)', 'crimson', 1, 0),
+    ]
+
+    for cle, titre, couleur, i, j in series:
+        ax = axes[i, j]
+        cle_fallback = 't_marche_no' if cle == 't_no' else 't_marche_bh' if cle == 't_bh' else None
+        for n in tailles:
+            valeurs = _extraire_temps(resultats, n, cle, cle_fallback)
+            x = [n] * len(valeurs)
+            y = [v * 1000 for v in valeurs]
+            ax.scatter(x, y, alpha=0.6, s=20, color=couleur)
+        ax.set_xlabel('n')
+        ax.set_ylabel('Temps (ms)')
+        ax.set_title(titre)
+        ax.grid(True, alpha=0.3)
+
     ax = axes[1, 1]
-    for n in tailles_n:
-        totaux = [resultats[n]['theta_no'][i] + resultats[n]['t_marche_no'][i] 
-                  for i in range(len(resultats[n]['theta_no']))]
+    for n in tailles:
+        theta_no = _extraire_temps(resultats, n, 'theta_no')
+        t_no = _extraire_temps(resultats, n, 't_no', 't_marche_no')
+        totaux = [(theta_no[i] + t_no[i]) * 1000 for i in range(min(len(theta_no), len(t_no)))]
         x = [n] * len(totaux)
-        ax.scatter(x, totaux, alpha=0.6, s=30, color='purple')
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('(theta_NO + tNO)(n) - Total Nord-Ouest')
+        ax.scatter(x, totaux, alpha=0.6, s=20, color='purple')
+    ax.set_xlabel('n')
+    ax.set_ylabel('Temps (ms)')
+    ax.set_title('(θ_NO + t_NO)(n)')
     ax.grid(True, alpha=0.3)
-    
-    ax = axes[1, 2] 
-    for n in tailles_n:
-        totaux = [resultats[n]['theta_bh'][i] + resultats[n]['t_marche_bh'][i] 
-                  for i in range(len(resultats[n]['theta_bh']))]
+
+    ax = axes[1, 2]
+    for n in tailles:
+        theta_bh = _extraire_temps(resultats, n, 'theta_bh')
+        t_bh = _extraire_temps(resultats, n, 't_bh', 't_marche_bh')
+        totaux = [(theta_bh[i] + t_bh[i]) * 1000 for i in range(min(len(theta_bh), len(t_bh)))]
         x = [n] * len(totaux)
-        ax.scatter(x, totaux, alpha=0.6, s=30, color='brown')
-    ax.set_xlabel('Taille n')
-    ax.set_ylabel('Temps (secondes)')
-    ax.set_title('(theta_BH + tBH)(n) - Total Balas-Hammer')
+        ax.scatter(x, totaux, alpha=0.6, s=20, color='saddlebrown')
+    ax.set_xlabel('n')
+    ax.set_ylabel('Temps (ms)')
+    ax.set_title('(θ_BH + t_BH)(n)')
     ax.grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
-    plt.savefig('complexite_nuages_points.png', dpi=300)
-    print("\n[OK] Graphique sauvegarde: complexite_nuages_points.png")
-    plt.show()
+    plt.savefig('plot1_nuages.png')
+    plt.close(fig)
 
 
-def tracer_pire_des_cas(resultats, tailles_n):
-    """Trace l'enveloppe superieure (pire des cas) pour chaque algorithme."""
-    
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    
-    maxima_no = [max(resultats[n]['theta_no']) for n in tailles_n]
-    maxima_bh = [max(resultats[n]['theta_bh']) for n in tailles_n]
-    maxima_marche_no = [max(resultats[n]['t_marche_no']) for n in tailles_n]
-    maxima_marche_bh = [max(resultats[n]['t_marche_bh']) for n in tailles_n]
-    maxima_total_no = [maxima_no[i] + maxima_marche_no[i] for i in range(len(tailles_n))]
-    maxima_total_bh = [maxima_bh[i] + maxima_marche_bh[i] for i in range(len(tailles_n))]
-    
-    # Tracer les courbes
-    ax.plot(tailles_n, maxima_no, 'o-', label='theta_NO(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_bh, 's-', label='theta_BH(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_marche_no, '^-', label='tNO(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_marche_bh, 'v-', label='tBH(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_total_no, 'D-', label='(theta_NO + tNO)(n)', linewidth=2, markersize=8)
-    ax.plot(tailles_n, maxima_total_bh, 'x-', label='(theta_BH + tBH)(n)', linewidth=2, markersize=8)
-    
-    ax.set_xlabel('Taille n', fontsize=12)
-    ax.set_ylabel('Temps (secondes)', fontsize=12)
-    ax.set_title('Complexite dans le Pire des Cas', fontsize=14, fontweight='bold')
-    ax.legend(fontsize=10)
-    ax.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('complexite_pire_des_cas.png', dpi=300)
-    print("[OK] Graphique sauvegarde: complexite_pire_des_cas.png")
-    plt.show()
-
-
-def tracer_comparaison_ratios(resultats, tailles_n):
-    """Trace le ratio (tNO + theta_NO) / (tBH + theta_BH) pour comparer les algorithmes."""
-    
+def tracer_pire_cas(resultats, tailles):
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    
-    ratios = []
-    for n in tailles_n:
-        maxima_total_no = max(resultats[n]['theta_no']) + max(resultats[n]['t_marche_no'])
-        maxima_total_bh = max(resultats[n]['theta_bh']) + max(resultats[n]['t_marche_bh'])
-        ratio = maxima_total_no / maxima_total_bh if maxima_total_bh > 0 else 1
-        ratios.append(ratio)
-    
-    colors = ['green' if r < 1 else 'red' for r in ratios]
-    ax.bar(tailles_n, ratios, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
-    ax.axhline(y=1, color='black', linestyle='--', linewidth=2, label='Equivalent')
-    
-    ax.set_xlabel('Taille n', fontsize=12)
-    ax.set_ylabel('Ratio (theta_NO + tNO) / (theta_BH + tBH)', fontsize=12)
-    ax.set_title('Comparaison des Algorithmes: Nord-Ouest vs Balas-Hammer', fontsize=14, fontweight='bold')
+
+    maxima_theta_no = []
+    maxima_theta_bh = []
+    maxima_t_no = []
+    maxima_t_bh = []
+    maxima_total_no = []
+    maxima_total_bh = []
+
+    for n in tailles:
+        theta_no = _extraire_temps(resultats, n, 'theta_no')
+        theta_bh = _extraire_temps(resultats, n, 'theta_bh')
+        t_no = _extraire_temps(resultats, n, 't_no', 't_marche_no')
+        t_bh = _extraire_temps(resultats, n, 't_bh', 't_marche_bh')
+
+        tot_no = [(theta_no[i] + t_no[i]) * 1000 for i in range(min(len(theta_no), len(t_no)))]
+        tot_bh = [(theta_bh[i] + t_bh[i]) * 1000 for i in range(min(len(theta_bh), len(t_bh)))]
+
+        maxima_theta_no.append(max([v * 1000 for v in theta_no]) if theta_no else 0)
+        maxima_theta_bh.append(max([v * 1000 for v in theta_bh]) if theta_bh else 0)
+        maxima_t_no.append(max([v * 1000 for v in t_no]) if t_no else 0)
+        maxima_t_bh.append(max([v * 1000 for v in t_bh]) if t_bh else 0)
+        maxima_total_no.append(max(tot_no) if tot_no else 0)
+        maxima_total_bh.append(max(tot_bh) if tot_bh else 0)
+
+    ax.plot(tailles, maxima_theta_no, 'o-', label='θ_NO(n)', linewidth=2, markersize=8)
+    ax.plot(tailles, maxima_theta_bh, 's-', label='θ_BH(n)', linewidth=2, markersize=8)
+    ax.plot(tailles, maxima_t_no, '^-', label='t_NO(n)', linewidth=2, markersize=8)
+    ax.plot(tailles, maxima_t_bh, 'v-', label='t_BH(n)', linewidth=2, markersize=8)
+    ax.plot(tailles, maxima_total_no, 'D-', label='(θ_NO+t_NO)(n)', linewidth=2, markersize=8)
+    ax.plot(tailles, maxima_total_bh, 'x-', label='(θ_BH+t_BH)(n)', linewidth=2, markersize=8)
+
+    ax.set_xlabel('n', fontsize=12)
+    ax.set_ylabel('Temps (ms)', fontsize=12)
+    ax.set_title('Complexité dans le pire des cas (enveloppe supérieure)', fontsize=14, fontweight='bold')
     ax.legend(fontsize=10)
-    ax.grid(True, alpha=0.3, axis='y')
-    
-    for i, (n, r) in enumerate(zip(tailles_n, ratios)):
-        ax.text(n, r + 0.05, f'{r:.3f}', ha='center', fontsize=10)
-    
+    ax.grid(True, alpha=0.3)
+
     plt.tight_layout()
-    plt.savefig('complexite_comparaison_ratios.png', dpi=300)
-    print("[OK] Graphique sauvegarde: complexite_comparaison_ratios.png")
-    plt.show()
+    plt.savefig('plot2_pire_cas.png')
+    plt.close(fig)
+
+
+def tracer_ratio(resultats, tailles):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+    ratios = []
+    for n in tailles:
+        theta_no = _extraire_temps(resultats, n, 'theta_no')
+        theta_bh = _extraire_temps(resultats, n, 'theta_bh')
+        t_no = _extraire_temps(resultats, n, 't_no', 't_marche_no')
+        t_bh = _extraire_temps(resultats, n, 't_bh', 't_marche_bh')
+
+        tot_no = [(theta_no[i] + t_no[i]) for i in range(min(len(theta_no), len(t_no)))]
+        tot_bh = [(theta_bh[i] + t_bh[i]) for i in range(min(len(theta_bh), len(t_bh)))]
+
+        ratio = max(tot_no) / max(tot_bh) if tot_bh and max(tot_bh) > 0 else float('inf')
+        ratios.append(ratio)
+
+    x = list(range(len(tailles)))
+    colors = ['seagreen' if r < 1 else 'crimson' for r in ratios]
+    ax.bar(x, ratios, color=colors, alpha=0.7, edgecolor='black', linewidth=1.5)
+    ax.axhline(y=1, color='black', linestyle='--', linewidth=2, label='Égalité')
+
+    ax.set_xlabel('n', fontsize=12)
+    ax.set_ylabel('Ratio', fontsize=12)
+    ax.set_title('Ratio pire cas : (θ_NO + t_NO) / (θ_BH + t_BH)', fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(n) for n in tailles])
+    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend(fontsize=10)
+
+    for xi, ratio in zip(x, ratios):
+        ax.text(xi, ratio + 0.02, f'{ratio:.2f}', ha='center', va='bottom', fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig('plot3_ratio.png')
+    plt.close(fig)
+
+
+def tracer_loglog(resultats, tailles):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+    x = np.array(tailles)
+    series = {
+        'θ_NO(n)': [max([v * 1000 for v in _extraire_temps(resultats, n, 'theta_no')]) if _extraire_temps(resultats, n, 'theta_no') else 0 for n in tailles],
+        'θ_BH(n)': [max([v * 1000 for v in _extraire_temps(resultats, n, 'theta_bh')]) if _extraire_temps(resultats, n, 'theta_bh') else 0 for n in tailles],
+        't_NO(n)': [max([v * 1000 for v in _extraire_temps(resultats, n, 't_no', 't_marche_no')]) if _extraire_temps(resultats, n, 't_no', 't_marche_no') else 0 for n in tailles],
+        't_BH(n)': [max([v * 1000 for v in _extraire_temps(resultats, n, 't_bh', 't_marche_bh')]) if _extraire_temps(resultats, n, 't_bh', 't_marche_bh') else 0 for n in tailles],
+    }
+
+    series['(θ_NO+t_NO)(n)'] = [max([( _extraire_temps(resultats, n, 'theta_no')[i] + _extraire_temps(resultats, n, 't_no', 't_marche_no')[i]) * 1000 for i in range(min(len(_extraire_temps(resultats, n, 'theta_no')), len(_extraire_temps(resultats, n, 't_no', 't_marche_no'))))]) if min(len(_extraire_temps(resultats, n, 'theta_no')), len(_extraire_temps(resultats, n, 't_no', 't_marche_no'))) > 0 else 0 for n in tailles]
+    series['(θ_BH+t_BH)(n)'] = [max([( _extraire_temps(resultats, n, 'theta_bh')[i] + _extraire_temps(resultats, n, 't_bh', 't_marche_bh')[i]) * 1000 for i in range(min(len(_extraire_temps(resultats, n, 'theta_bh')), len(_extraire_temps(resultats, n, 't_bh', 't_marche_bh'))))]) if min(len(_extraire_temps(resultats, n, 'theta_bh')), len(_extraire_temps(resultats, n, 't_bh', 't_marche_bh'))) > 0 else 0 for n in tailles]
+
+    for label, y in series.items():
+        if any(y):
+            ax.plot(x, y, marker='o', label=label)
+
+    refs = {
+        'O(n)': lambda x: x,
+        'O(n log n)': lambda x: x * np.log(x),
+        'O(n²)': lambda x: x ** 2,
+        'O(n³)': lambda x: x ** 3,
+    }
+    if x[0] > 0:
+        max_actual = max(max(y) for y in series.values() if any(y)) or 1
+        for label, func in refs.items():
+            y_ref = func(x.astype(float))
+            y_ref = y_ref / y_ref[0] * max_actual
+            ax.plot(x, y_ref, linestyle='--', label=label)
+
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('n', fontsize=12)
+    ax.set_ylabel('Temps (ms)', fontsize=12)
+    ax.set_title('Identification de la complexité (log-log)', fontsize=14, fontweight='bold')
+    ax.legend(fontsize=9)
+    ax.grid(True, which='both', alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('plot4_loglog.png')
+    plt.close(fig)
+
+
+def tracer_tous_les_plots(resultats, tailles):
+    tracer_nuages(resultats, tailles)
+    tracer_pire_cas(resultats, tailles)
+    tracer_ratio(resultats, tailles)
+    tracer_loglog(resultats, tailles)
 
 
 def identifier_complexite(tailles, temps_max):
@@ -461,29 +532,9 @@ def run_complexite():
         print("GENERATION DES GRAPHIQUES FINAUX")
         print("="*70)
         
-        tracer_nuages_de_points(resultats, tailles_n)
-        tracer_pire_des_cas(resultats, tailles_n)
-        tracer_comparaison_ratios(resultats, tailles_n)
+        tracer_tous_les_plots(resultats, tailles_n)
         
-        donnees_export = {}
-        for n in tailles_n:
-            donnees_export[str(n)] = {
-                'n': n,
-                'iterations': len(resultats[n]['theta_no']),
-                'no_max': max(resultats[n]['theta_no']),
-                'no_moy': sum(resultats[n]['theta_no']) / len(resultats[n]['theta_no']),
-                'bh_max': max(resultats[n]['theta_bh']),
-                'bh_moy': sum(resultats[n]['theta_bh']) / len(resultats[n]['theta_bh']),
-                'marche_no_max': max(resultats[n]['t_marche_no']),
-                'marche_no_moy': sum(resultats[n]['t_marche_no']) / len(resultats[n]['t_marche_no']),
-                'marche_bh_max': max(resultats[n]['t_marche_bh']),
-                'marche_bh_moy': sum(resultats[n]['t_marche_bh']) / len(resultats[n]['t_marche_bh']),
-            }
-        
-        with open('resultats_complexite.json', 'w') as f:
-            json.dump(donnees_export, f, indent=2)
-        
-        print("\n[OK] Resultats sauvegardes dans resultats_complexite.json")
+        generer_resume_checkpoint(resultats)
         print("\n" + "="*70)
         print("ETUDE TERMINEE")
         print("="*70)

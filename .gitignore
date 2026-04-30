@@ -1,0 +1,9 @@
+# Fichiers générés - Plots
+plot1_nuages.png
+plot2_pire_cas.png
+plot3_ratio.png
+plot4_loglog.png
+
+# Fichiers générés - Données JSON
+checkpoint_complexite.json
+resultats_complexite.json
