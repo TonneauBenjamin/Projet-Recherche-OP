@@ -179,7 +179,7 @@ def etude_complexite_complete():
     """
     
     tailles_n = [10, 40, 100, 400, 1000, 4000, 10000]  
-    iterations = 10
+    iterations = 100
      
     # Charger les resultats existants si disponibles
     resultats = charger_resultats_existants()
